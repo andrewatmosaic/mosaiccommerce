@@ -30,40 +30,51 @@
 <body class="min-h-screen flex items-center justify-center">
 
   <main class="glass rounded-3xl shadow-2xl w-full max-w-6xl mx-4 my-8 p-0">
+     <!-- Header Bar -->
+    <header class="w-full flex items-center px-10 pt-8 pb-2 border-b border-white/10">
+      <!-- Solid Triangle Heroicon -->
+      <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" class="w-11 h-11 mr-3 flex-shrink-0">
+        <polygon points="12 5 21 19 3 19" />
+      </svg>
+      <h2 class="nhg text-white text-3xl md:text-4xl m-0">
+        <span class="font-semibold">Mosaic</span>
+        <span class="font-light">Commerce</span>
+      </h2>
+    </header>
     <!-- 2 columns on md+, 1 column on mobile, explicit order for mobile stacking -->
     <div class="grid grid-cols-1 md:grid-cols-2">
       <!-- COL 1 ROW 1: Avatar + Name -->
       <div class="flex flex-col items-start justify-end px-10 pt-8 pb-2 order-1 md:order-none">
-        <img src="../src/imgs/DSC03598.JPG"
+        <img src="./imgs/DSC03598.JPG"
           alt="Andrew Miller"
           class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg mb-3" />
-        <h1 class="text-white text-3xl font-bold nhg mb-0 mt-2">Andrew Miller</h1>
+        <h1 class="text-white text-3xl font-light nhg tracking-wide mb-0 mt-2">Andrew Miller</h1>
       </div>
 
       <!-- COL 2 ROW 1: Mosaic Commerce headline -->
       <div class="flex flex-col items-start justify-end px-10 pb-10 md:pb-2 order-6 md:order-none">
-         <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white/90 hover:text-blue-200 transition text-base font-medium visible md:invisible">
+         <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white/90 hover:text-blue-200 transition text-base nhg tracking-wide font-medium visible md:invisible">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
             <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Get In Touch
         </a>
-        <h2 class="nhg text-white text-3xl md:text-4xl mt-8">
+        <!-- <h2 class="nhg text-white text-3xl md:text-4xl mt-8">
           <span class="font-semibold">Mosaic</span>
           <span class="font-light">Commerce</span>
-        </h2>
+        </h2> -->
       </div>
 
       <!-- COL 1 ROW 2: Bio + Get in Touch -->
       <div class="flex flex-col items-start justify-between px-10 pb-0 md:pb-8 order-2 md:order-none">
         <div>
-          <p class="text-white text-lg font-semibold">Designer. Developer. Creative Problem Solver.</p>
-          <p class="text-gray-200 text-base mb-8 max-w-lg leading-relaxed">
+          <p class="text-white text-lg font-semibold nhg tracking-wide">Designer. Developer. Creative Problem Solver.</p>
+          <p class="text-gray-200 text-base mb-8 max-w-lg leading-relaxed nhg font-light tracking-[.075em]">
             With a degree in design and 17+ years of Magento experience—including deep expertise in both Adobe Commerce Cloud (Enterprise) and Open Source—I blend creative vision with technical skill to help ecommerce businesses grow. As founder of Mosaic Commerce, I’ve guided clients from startup to scale, specializing in modern Magento builds, user-centered design, custom development, and seamless systems integration. I turn complex needs into clear, actionable plans and deliver tailored, scalable solutions for ambitious brands and established teams alike.
           </p>
         </div>
-        <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white/90 hover:text-blue-200 transition text-base font-medium invisible h-0 md:h-4 md:visible">
+        <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white/90 hover:text-blue-200 transition text-base nhg tracking-wide font-medium invisible h-0 md:h-4 md:visible">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
             <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
@@ -73,9 +84,9 @@
       </div>
 
       <!-- COL 2 ROW 2: Buttons -->
-      <div class="flex flex-col items-start px-10 pb-8 order-4 md:order-none">
-        <span class="text-white font-semibold mb-4 text-lg">Skills & Focus</span>
-        <div class="flex flex-wrap gap-4">
+      <div class="flex flex-col items-start px-10 pb-8 order-4 md:order-none nhg">
+        <span class="text-white font-semibold mb-4 text-lg tracking-wide">Skills & Focus</span>
+        <div class="flex flex-wrap gap-4 tracking-[.075em]">
           <a href="#" class="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Magento</a>
           <a href="#" class="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Adobe Commerce Cloud</a>
           <a href="#" class="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Systems Integration</a>
