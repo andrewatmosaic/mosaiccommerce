@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Mosaic Commerce – Andrew Miller</title>
@@ -11,19 +12,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background: 
-        linear-gradient(rgba(20,20,20,0.10), rgba(20,20,20,0.15)),
-        url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') no-repeat center center/cover;
+      background:
+        linear-gradient(rgba(20, 20, 20, 0.10), rgba(20, 20, 20, 0.15)),
+        url('./imgs/parkcitybg.jpeg') no-repeat center center/cover;
       font-family: 'Inter', Arial, sans-serif;
     }
+
     .nhgd {
       font-family: "neue-haas-grotesk-display", "Neue Haas Grotesk Display", "Helvetica Neue", Arial, sans-serif;
     }
+
     .nhgt {
       font-family: "neue-haas-grotesk-text", "Neue Haas Grotesk Text", "Helvetica Neue", Arial, sans-serif;
     }
   </style>
 </head>
+
 <body class="min-h-screen flex items-center justify-center">
 
   <main class="rounded-3xl shadow-2xl w-full max-w-7xl mx-4 my-8 p-0 
@@ -40,50 +44,51 @@
         <span class="font-light">Commerce</span>
       </h2>
     </header> -->
-    <div class="grid grid-cols-1 md:grid-cols-[40%_60%]">
+    <div class="grid grid-cols-1 md:grid-cols-[45%_55%]">
+
       <!-- Avatar + Name -->
-      <div class="flex flex-col items-start justify-end px-10 pt-8 pb-2 order-1 md:order-none bg-white/20 rounded-tl-3xl">
-        <img src="./imgs/andrew_miller_MosaicCommerce_web-crop.jpg"
-          alt="Andrew Miller"
-          class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-3" />
+      <div
+        class="flex flex-col items-start justify-end px-10 pt-8 pb-2 order-1 md:order-none bg-white/20 rounded-tl-3xl rounded-tr-3xl md:rounded-tr-none">
+        <img src="./imgs/andrew_miller_MosaicCommerce_web-crop.jpg" alt="Andrew Miller"
+          class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-2" />
+        <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white font-semibold text-lg pb-1 hover:opacity-80 focus:opacity-80 focus:outline-none transition-all">
+          <span class="border-b-2 border-dotted border-white/70">Get In Touch</span>
+          <svg class="w-6 h-6 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
+            <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
         <h1 class="text-black text-3xl font-light nhgd tracking-wide mt-2">Andrew Miller</h1>
+
       </div>
       <!-- Spacer for header on mobile -->
       <div class="flex flex-col items-start justify-end px-10 pb-10 md:pb-2 order-6 md:order-none">
-         <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-gray-800 hover:text-blue-700 transition text-base nhgt tracking-wide font-medium visible md:invisible">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
-            <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Get In Touch
-        </a>
+
       </div>
-      <!-- Bio + Get in Touch -->
-      <div class="flex flex-col items-start justify-between px-10 pb-0 md:pb-8 order-2 md:order-none bg-white/20 rounded-bl-3xl">
+      <!-- Bio -->
+      <div
+        class="flex flex-col items-start justify-between px-10 pb-0 md:pb-8 order-2 md:order-none bg-white/20 md:rounded-bl-3xl">
         <div>
           <p class="text-black text-lg font-[500] nhgt">Designer. Developer. Creative Problem Solver.</p>
           <p class="text-gray-800 text-base mb-8 max-w-lg leading-relaxed nhgt font-light text-sm">
-            With a degree in design and 17+ years of Magento experience—including deep expertise in both Adobe Commerce Cloud (Enterprise) and Open Source—I blend creative vision with technical skill to help ecommerce businesses grow. As founder of Mosaic Commerce, I’ve guided clients from startup to scale, specializing in modern Magento builds, user-centered design, custom development, and seamless systems integration. I turn complex needs into clear, actionable plans and deliver tailored, scalable solutions for ambitious brands and established teams alike.
+            With a degree in design and 17+ years of Magento experience—including deep expertise in both Adobe Commerce
+            Cloud (Enterprise) and Open Source—I blend creative vision with technical skill to help ecommerce businesses
+            grow. As founder of Mosaic Commerce, I’ve guided clients from startup to scale, specializing in modern
+            Magento builds, user-centered design, custom development, and seamless systems integration. I turn complex
+            needs into clear, actionable plans and deliver tailored, scalable solutions for ambitious brands and
+            established teams alike.
           </p>
         </div>
-        <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-gray-900 hover:text-blue-600 transition text-base nhgt tracking-wide font-medium invisible h-0 md:h-4 md:visible">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
-            <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Get In Touch
-        </a>
+
       </div>
       <!-- Buttons -->
-      <div class="flex flex-col items-start px-10 pb-8 order-4 md:order-none nhgt">
+      <div class="flex flex-col items-start px-10 py-8 order-4 md:py-0 md:order-none nhgt">
         <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mr-3 flex-shrink-0">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
-</svg>
-
-
-
-
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-24 h-24 mr-3 flex-shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+          </svg>
           <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" class="w-24 h-24 mr-3 flex-shrink-0 opacity-70">
           <polygon points="12 5 21 19 3 19" />
           </svg> -->
@@ -94,16 +99,27 @@
         </div>
         <!-- <span class="text-gray-900 font-[500] mb-4 text-lg">Skills & Focus</span> -->
         <div class="flex flex-wrap gap-4 tracking-wide mt-8">
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Magento</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Adobe Commerce Cloud</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Systems Integration</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">MageOS</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Hyvä</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Business Central</a>
-          <a href="#" class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Workato</a>
+          <a href="https://mage-os.org" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Magento</a>
+          <a href="https://business.adobe.com/products/commerce.html" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Adobe
+            Commerce Cloud</a>
+          <a href="#" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Systems
+            Integration</a>
+          <a href="https://mage-os.org" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">MageOS</a>
+          <a href="https://www.hyva.io" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Hyvä</a>
+          <a href="https://www.microsoft.com/en-us/dynamics-365/products/business-central" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Business
+            Central</a>
+          <a href="https://www.workato.com" target="_blank"
+            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Workato</a>
         </div>
       </div>
     </div>
   </main>
 </body>
+
 </html>
