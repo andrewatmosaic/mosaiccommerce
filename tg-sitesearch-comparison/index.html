@@ -6,6 +6,8 @@
   <title>Site Search Comparison – Staging vs Production</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     // Tailwind config (optional fine‑tuning for dark palette)
     tailwind.config = {
@@ -38,7 +40,10 @@
   <header class="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-base-900/70 bg-base-900/90 border-b border-zinc-800">
     <div class="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
       <h1 class="text-lg md:text-2xl font-semibold tracking-tight">Site Search Comparison</h1>
-      <div class="text-xs md:text-sm text-zinc-400">Staging vs Production</div>
+      <div class="text-xs md:text-sm text-zinc-400">
+        <div>Staging vs Production</div>
+        <div id="snapshot-indicator" class="text-zinc-500"></div>
+      </div>
     </div>
   </header>
 
@@ -52,53 +57,12 @@
     <div id="sections" class="space-y-8"></div>
   </main>
 
-  <!-- ===== Data: Edit this JSON block locally and push ===== -->
-  <!--
-    Schema:
-    {
-      "queries": [
-        {
-          "term": "leaf springs",
-          "staging": [{"sku":"TG-1111","title":"Leaf Spring Kit","url":"/products/tg-1111"}],
-          "production": [{"sku":"TG-1111","title":"Leaf Spring Kit","url":"/products/tg-1111"},{"sku":"TG-NEW","title":"New Leaf Spring","url":"/products/tg-new"}]
-        },
-        { ... }
-      ]
-    }
-  -->
-  <script type="application/json" id="search-data">
-  {
-    "queries": [
-      {
-        "term": "Query #1 (example)",
-        "staging": [
-          {"sku":"TG-1001","title":"Example Product A","url":"#"},
-          {"sku":"TG-1002","title":"Example Product B","url":"#"},
-          {"sku":"TG-1003","title":"Example Product C","url":"#"}
-        ],
-        "production": [
-          {"sku":"TG-1001","title":"Example Product A","url":"#"},
-          {"sku":"TG-9999","title":"Prod‑only Sample","url":"#"},
-          {"sku":"TG-1003","title":"Example Product C","url":"#"}
-        ]
-      },
-      {
-        "term": "Query #2 (example)",
-        "staging": [
-          {"sku":"AB-12","title":"Alpha Bar","url":"#"},
-          {"sku":"CD-34","title":"Cedar Drive","url":"#"}
-        ],
-        "production": [
-          {"sku":"AB-12","title":"Alpha Bar","url":"#"},
-          {"sku":"EF-56","title":"EverFast","url":"#"}
-        ]
-      }
-    ]
-  }
-  </script>
-
-  <!-- ===== Rendering script ===== -->
+  <!-- ===== Dynamic CSV Loading Script ===== -->
   <script>
+    // Configuration
+    const DEFAULT_TIMESTAMP = '20251016-173251';
+    
+    // Utility functions
     function $(sel, parent=document){ return parent.querySelector(sel); }
     function el(tag, cls, text){
       const n = document.createElement(tag);
@@ -109,38 +73,145 @@
 
     function normalizeSku(s){ return String(s || '').trim().toLowerCase(); }
 
-    function render() {
-      const dataScript = document.getElementById('search-data');
-      if (!dataScript) return;
-      const data = JSON.parse(dataScript.textContent || '{}');
+    // Get timestamp from URL parameter or use default
+    function getTimestamp() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('ts') || DEFAULT_TIMESTAMP;
+    }
 
-      const mount = document.getElementById('sections');
-      mount.innerHTML = '';
-
-      (data.queries || []).forEach((q, idx) => {
-        // Section wrapper
-        const section = el('section', 'rounded-2xl bg-base-800/80 ring-1 ring-zinc-800 shadow-soft');
-
-        // Header bar
-        const header = el('div', 'flex items-center justify-between px-4 md:px-6 py-3 border-b border-zinc-800');
-        const title = el('h2', 'text-base md:text-lg font-semibold tracking-tight', q.term || `Query ${idx+1}`);
-        const count = el('div', 'text-xs text-zinc-400');
-        const stCount = (q.staging || []).length;
-        const prCount = (q.production || []).length;
-        count.textContent = `Staging: ${stCount} • Production: ${prCount}`;
-        header.append(title, count);
-
-        // Columns
-        const grid = el('div', 'grid grid-cols-1 md:grid-cols-2 gap-0');
-
-        const stagingCol = column('Staging', q.staging || [], { emphasize: false });
-        const productionCol = column('Production', q.production || [], { emphasize: true, stagingSkus: new Set((q.staging || []).map(r => normalizeSku(r.sku))) });
-
-        grid.append(stagingCol, productionCol);
-
-        section.append(header, grid);
-        mount.append(section);
+    // Load and parse CSV file
+    function loadCSV(filename, hasHeader = true) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(filename, {
+          download: true,
+          header: hasHeader,
+          skipEmptyLines: true,
+          delimiter: hasHeader ? "," : "", // Explicit delimiter for header files, auto-detect for simple lists
+          complete: function(results) {
+            if (results.errors.length > 0) {
+              // Only reject if there are serious errors, not just delimiter warnings
+              const seriousErrors = results.errors.filter(e => !e.message.includes('delimiting character'));
+              if (seriousErrors.length > 0) {
+                reject(new Error(`CSV parsing errors: ${seriousErrors.map(e => e.message).join(', ')}`));
+              } else {
+                resolve(results.data);
+              }
+            } else {
+              resolve(results.data);
+            }
+          },
+          error: function(error) {
+            reject(error);
+          }
+        });
       });
+    }
+
+    // Group CSV data by query and sort by rank
+    function groupByQuery(csvData) {
+      const grouped = {};
+      
+      csvData.forEach(row => {
+        const query = row.query?.trim();
+        if (!query) return;
+        
+        if (!grouped[query]) {
+          grouped[query] = [];
+        }
+        
+        grouped[query].push({
+          sku: row.sku?.trim(),
+          title: row.name?.trim() || row.sku?.trim() || 'Untitled',
+          rank: parseInt(row.rank) || 999,
+          total_count: parseInt(row.total_count) || 0
+        });
+      });
+      
+      // Sort each query's results by rank
+      Object.keys(grouped).forEach(query => {
+        grouped[query].sort((a, b) => a.rank - b.rank);
+      });
+      
+      return grouped;
+    }
+
+    // Main rendering function
+    async function render() {
+      const timestamp = getTimestamp();
+      const snapshotIndicator = $('#snapshot-indicator');
+      const mount = $('#sections');
+      
+      try {
+        // Update snapshot indicator
+        snapshotIndicator.textContent = `Snapshot: ${timestamp}`;
+        
+        // Show loading state
+        mount.innerHTML = '<div class="text-center py-8 text-zinc-400">Loading CSV data...</div>';
+        
+        // Load all three CSV files
+        const [stagingData, prodData, prodOnlySkus] = await Promise.all([
+          loadCSV(`stage_snapshot_${timestamp}.csv`),
+          loadCSV(`prod_snapshot_${timestamp}.csv`),
+          loadCSV('prod_only_skus.csv', false) // No header for simple SKU list
+        ]);
+        
+        // Create Set of prod-only SKUs for fast lookup
+        const prodOnlySkuSet = new Set(
+          prodOnlySkus.map(row => normalizeSku(row[0])).filter(sku => sku) // First column is SKU, filter out empty strings
+        );
+        
+        // Group data by query
+        const stagingGrouped = groupByQuery(stagingData);
+        const prodGrouped = groupByQuery(prodData);
+        
+        // Get all unique queries
+        const allQueries = new Set([
+          ...Object.keys(stagingGrouped),
+          ...Object.keys(prodGrouped)
+        ]);
+        
+        // Clear loading state
+        mount.innerHTML = '';
+        
+        // Render each query
+        Array.from(allQueries).sort().forEach(query => {
+          const stagingItems = stagingGrouped[query] || [];
+          const prodItems = prodGrouped[query] || [];
+          
+          // Section wrapper
+          const section = el('section', 'rounded-2xl bg-base-800/80 ring-1 ring-zinc-800 shadow-soft');
+          
+          // Header bar
+          const header = el('div', 'flex items-center justify-between px-4 md:px-6 py-3 border-b border-zinc-800');
+          const title = el('h2', 'text-base md:text-lg font-semibold tracking-tight', query);
+          const count = el('div', 'text-xs text-zinc-400');
+          count.textContent = `Staging: ${stagingItems.length} • Production: ${prodItems.length}`;
+          header.append(title, count);
+          
+          // Columns
+          const grid = el('div', 'grid grid-cols-1 md:grid-cols-2 gap-0');
+          
+          const stagingCol = column('Staging', stagingItems, { emphasize: false });
+          const productionCol = column('Production', prodItems, { emphasize: true, prodOnlySkus: prodOnlySkuSet });
+          
+          grid.append(stagingCol, productionCol);
+          
+          section.append(header, grid);
+          mount.append(section);
+        });
+        
+      } catch (error) {
+        console.error('Error loading CSV data:', error);
+        mount.innerHTML = `
+          <div class="rounded-2xl bg-red-900/20 ring-1 ring-red-800 p-6 text-center">
+            <h3 class="text-lg font-semibold text-red-300 mb-2">Error Loading Data</h3>
+            <p class="text-sm text-red-200 mb-4">Failed to load CSV files for timestamp: ${timestamp}</p>
+            <p class="text-xs text-red-300">${error.message}</p>
+            <p class="text-xs text-zinc-400 mt-2">Make sure the CSV files exist and the timestamp parameter is correct.</p>
+          </div>
+        `;
+        snapshotIndicator.textContent = `Error: ${timestamp}`;
+      }
     }
 
     function column(title, items, opts={}) {
@@ -155,16 +226,22 @@
       (items || []).forEach((item, i) => {
         const row = el('li', 'rounded-xl bg-base-700/70 ring-1 ring-zinc-800 px-3 py-2');
         const top = el('div', 'flex items-start justify-between gap-3');
-        const left = el('div', 'min-w-0');
-        const rank = el('span', 'mr-2 inline-block w-6 shrink-0 text-right text-[11px] text-zinc-500', String(i+1)+'.');
-        const title = el('a', 'truncate text-sm font-medium text-zinc-200 hover:underline', item.title || item.sku || 'Untitled');
-        if (item.url) title.href = item.url;
-        const meta = el('div', 'mt-0.5 text-[11px] text-zinc-400');
+        
+        // Left side with number and content
+        const left = el('div', 'flex items-start gap-2 min-w-0 flex-1');
+        const rank = el('span', 'shrink-0 text-zinc-500', String(item.rank || i+1)+'.');
+        const content = el('div', 'min-w-0 flex-1');
+        
+        const titleEl = el('a', 'text-sm font-medium text-zinc-200 hover:underline break-words', item.title || item.sku || 'Untitled');
+        titleEl.href = '#'; // Placeholder URL
+        const meta = el('div', 'mt-0.5 text-[11px] text-zinc-400 break-words');
         meta.textContent = item.sku ? String(item.sku) : '';
-        left.append(el('div', 'flex items-center gap-2', '').appendChild(rank).parentNode, title, meta);
+        
+        content.append(titleEl, meta);
+        left.append(rank, content);
 
-        // Badge for Prod‑only (only when opts.emphasize === true and sku not in staging set)
-        if (opts.emphasize && opts.stagingSkus && item.sku && !opts.stagingSkus.has(String(item.sku).trim().toLowerCase())) {
+        // Badge for Prod‑only (only when opts.emphasize === true and sku is in prod-only set)
+        if (opts.emphasize && opts.prodOnlySkus && item.sku && opts.prodOnlySkus.has(normalizeSku(item.sku))) {
           const badge = el('span', 'ml-2 inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300');
           badge.textContent = 'Prod only';
           top.append(badge);
@@ -179,7 +256,8 @@
       return wrap;
     }
 
-    render();
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', render);
   </script>
 </body>
 </html>
