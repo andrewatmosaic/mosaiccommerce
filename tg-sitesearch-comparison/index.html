@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Site Search Comparison – Staging vs Production</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config (optional fine‑tuning for dark palette)
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base: {
+              900: '#0b0b0e', // page background
+              800: '#111218', // section background
+              700: '#1a1c23', // cards / columns
+            }
+          },
+          fontFamily: {
+            ui: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Ubuntu", "Cantarell", "Noto Sans", "Helvetica Neue", "Arial", "sans-serif"],
+          },
+          boxShadow: {
+            soft: '0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.4)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Improves text rendering on dark backgrounds */
+    html { color-scheme: dark; }
+  </style>
+</head>
+<body class="bg-base-900 text-zinc-200 font-ui antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-base-900/70 bg-base-900/90 border-b border-zinc-800">
+    <div class="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
+      <h1 class="text-lg md:text-2xl font-semibold tracking-tight">Site Search Comparison</h1>
+      <div class="text-xs md:text-sm text-zinc-400">Staging vs Production</div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 space-y-8">
+    <!-- Note / legend -->
+    <section class="rounded-2xl bg-base-800/80 ring-1 ring-zinc-800 p-4 md:p-6 shadow-soft">
+      <p class="text-sm text-zinc-400">This page lists search results side‑by‑side for each query. Items in the <span class="font-medium text-zinc-200">Production</span> column that do not appear in <span class="font-medium text-zinc-200">Staging</span> for the same query are marked with a <span class="inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300">Prod only</span> badge.</p>
+    </section>
+
+    <!-- Sections mount here -->
+    <div id="sections" class="space-y-8"></div>
+  </main>
+
+  <!-- ===== Data: Edit this JSON block locally and push ===== -->
+  <!--
+    Schema:
+    {
+      "queries": [
+        {
+          "term": "leaf springs",
+          "staging": [{"sku":"TG-1111","title":"Leaf Spring Kit","url":"/products/tg-1111"}],
+          "production": [{"sku":"TG-1111","title":"Leaf Spring Kit","url":"/products/tg-1111"},{"sku":"TG-NEW","title":"New Leaf Spring","url":"/products/tg-new"}]
+        },
+        { ... }
+      ]
+    }
+  -->
+  <script type="application/json" id="search-data">
+  {
+    "queries": [
+      {
+        "term": "Query #1 (example)",
+        "staging": [
+          {"sku":"TG-1001","title":"Example Product A","url":"#"},
+          {"sku":"TG-1002","title":"Example Product B","url":"#"},
+          {"sku":"TG-1003","title":"Example Product C","url":"#"}
+        ],
+        "production": [
+          {"sku":"TG-1001","title":"Example Product A","url":"#"},
+          {"sku":"TG-9999","title":"Prod‑only Sample","url":"#"},
+          {"sku":"TG-1003","title":"Example Product C","url":"#"}
+        ]
+      },
+      {
+        "term": "Query #2 (example)",
+        "staging": [
+          {"sku":"AB-12","title":"Alpha Bar","url":"#"},
+          {"sku":"CD-34","title":"Cedar Drive","url":"#"}
+        ],
+        "production": [
+          {"sku":"AB-12","title":"Alpha Bar","url":"#"},
+          {"sku":"EF-56","title":"EverFast","url":"#"}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- ===== Rendering script ===== -->
+  <script>
+    function $(sel, parent=document){ return parent.querySelector(sel); }
+    function el(tag, cls, text){
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    }
+
+    function normalizeSku(s){ return String(s || '').trim().toLowerCase(); }
+
+    function render() {
+      const dataScript = document.getElementById('search-data');
+      if (!dataScript) return;
+      const data = JSON.parse(dataScript.textContent || '{}');
+
+      const mount = document.getElementById('sections');
+      mount.innerHTML = '';
+
+      (data.queries || []).forEach((q, idx) => {
+        // Section wrapper
+        const section = el('section', 'rounded-2xl bg-base-800/80 ring-1 ring-zinc-800 shadow-soft');
+
+        // Header bar
+        const header = el('div', 'flex items-center justify-between px-4 md:px-6 py-3 border-b border-zinc-800');
+        const title = el('h2', 'text-base md:text-lg font-semibold tracking-tight', q.term || `Query ${idx+1}`);
+        const count = el('div', 'text-xs text-zinc-400');
+        const stCount = (q.staging || []).length;
+        const prCount = (q.production || []).length;
+        count.textContent = `Staging: ${stCount} • Production: ${prCount}`;
+        header.append(title, count);
+
+        // Columns
+        const grid = el('div', 'grid grid-cols-1 md:grid-cols-2 gap-0');
+
+        const stagingCol = column('Staging', q.staging || [], { emphasize: false });
+        const productionCol = column('Production', q.production || [], { emphasize: true, stagingSkus: new Set((q.staging || []).map(r => normalizeSku(r.sku))) });
+
+        grid.append(stagingCol, productionCol);
+
+        section.append(header, grid);
+        mount.append(section);
+      });
+    }
+
+    function column(title, items, opts={}) {
+      const wrap = el('div', 'p-4 md:p-6');
+      const head = el('div', 'mb-3 flex items-center justify-between');
+      head.append(
+        el('h3', 'text-sm font-medium uppercase tracking-wide text-zinc-400', title)
+      );
+
+      const list = el('ol', 'space-y-2');
+
+      (items || []).forEach((item, i) => {
+        const row = el('li', 'rounded-xl bg-base-700/70 ring-1 ring-zinc-800 px-3 py-2');
+        const top = el('div', 'flex items-start justify-between gap-3');
+        const left = el('div', 'min-w-0');
+        const rank = el('span', 'mr-2 inline-block w-6 shrink-0 text-right text-[11px] text-zinc-500', String(i+1)+'.');
+        const title = el('a', 'truncate text-sm font-medium text-zinc-200 hover:underline', item.title || item.sku || 'Untitled');
+        if (item.url) title.href = item.url;
+        const meta = el('div', 'mt-0.5 text-[11px] text-zinc-400');
+        meta.textContent = item.sku ? String(item.sku) : '';
+        left.append(el('div', 'flex items-center gap-2', '').appendChild(rank).parentNode, title, meta);
+
+        // Badge for Prod‑only (only when opts.emphasize === true and sku not in staging set)
+        if (opts.emphasize && opts.stagingSkus && item.sku && !opts.stagingSkus.has(String(item.sku).trim().toLowerCase())) {
+          const badge = el('span', 'ml-2 inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300');
+          badge.textContent = 'Prod only';
+          top.append(badge);
+        }
+
+        top.prepend(left);
+        row.append(top);
+        list.append(row);
+      });
+
+      wrap.append(head, list);
+      return wrap;
+    }
+
+    render();
+  </script>
+</body>
+</html>
