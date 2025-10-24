@@ -33,6 +33,46 @@
   <style>
     /* Improves text rendering on dark backgrounds */
     html { color-scheme: dark; }
+    
+    /* Scrollable title behavior */
+    .scrollable-title {
+      overflow-x: hidden;
+      white-space: nowrap;
+      cursor: text;
+      user-select: text;
+      display: block;
+      width: 100%;
+    }
+    
+    .scrollable-title:hover,
+    .scrollable-title:focus {
+      overflow-x: auto;
+    }
+    
+    /* Hide scrollbar but keep functionality */
+    .scrollable-title::-webkit-scrollbar {
+      height: 0;
+    }
+    
+    .scrollable-title {
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    /* Cross-reference highlighting */
+    .cross-reference-highlight {
+      background-color: rgba(34, 197, 94, 0.15) !important; /* muted green */
+      border-color: rgba(34, 197, 94, 0.3) !important;
+    }
+    
+    /* Presence indicator */
+    .presence-indicator {
+      width: 6px;
+      height: 6px;
+      background-color: rgba(34, 197, 94, 0.8);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body class="bg-base-900 text-zinc-200 font-ui antialiased">
@@ -178,6 +218,10 @@
           const stagingItems = stagingGrouped[query] || [];
           const prodItems = prodGrouped[query] || [];
           
+          // Create sets for cross-reference matching
+          const stagingSkus = new Set(stagingItems.map(item => normalizeSku(item.sku)));
+          const prodSkus = new Set(prodItems.map(item => normalizeSku(item.sku)));
+          
           // Section wrapper
           const section = el('section', 'rounded-2xl bg-base-800/80 ring-1 ring-zinc-800 shadow-soft');
           
@@ -191,8 +235,18 @@
           // Columns
           const grid = el('div', 'grid grid-cols-1 md:grid-cols-2 gap-0');
           
-          const stagingCol = column('Staging', stagingItems, { emphasize: false });
-          const productionCol = column('Production', prodItems, { emphasize: true, prodOnlySkus: prodOnlySkuSet });
+          const stagingCol = column('Staging', stagingItems, { 
+            emphasize: false, 
+            prodOnlySkus: prodOnlySkuSet,
+            crossReferenceSkus: prodSkus,
+            oppositeColumnSkus: prodSkus
+          });
+          const productionCol = column('Production', prodItems, { 
+            emphasize: true, 
+            prodOnlySkus: prodOnlySkuSet,
+            crossReferenceSkus: stagingSkus,
+            oppositeColumnSkus: stagingSkus
+          });
           
           grid.append(stagingCol, productionCol);
           
@@ -225,15 +279,23 @@
 
       (items || []).forEach((item, i) => {
         const row = el('li', 'rounded-xl bg-base-700/70 ring-1 ring-zinc-800 px-3 py-2');
+        row.setAttribute('data-sku', normalizeSku(item.sku)); // Add data attribute for easier matching
         const top = el('div', 'flex items-start justify-between gap-3');
         
-        // Left side with number and content
+        // Left side with presence indicator, number and content
         const left = el('div', 'flex items-start gap-2 min-w-0 flex-1');
-        const rank = el('span', 'shrink-0 text-zinc-500', String(item.rank || i+1)+'.');
-        const content = el('div', 'min-w-0 flex-1');
         
-        const titleEl = el('a', 'text-sm font-medium text-zinc-200 hover:underline break-words', item.title || item.sku || 'Untitled');
-        titleEl.href = '#'; // Placeholder URL
+        // Presence indicator (green dot for items in both environments)
+        const hasPresenceIndicator = opts.oppositeColumnSkus && item.sku && opts.oppositeColumnSkus.has(normalizeSku(item.sku));
+        if (hasPresenceIndicator) {
+          const presenceDot = el('div', 'presence-indicator');
+          left.append(presenceDot);
+        }
+        
+        const rank = el('span', 'shrink-0 text-zinc-500', String(item.rank || i+1)+'.');
+        const content = el('div', 'min-w-0 flex-1 overflow-hidden');
+        
+        const titleEl = el('span', 'text-sm font-medium text-zinc-200 scrollable-title', item.title || item.sku || 'Untitled');
         const meta = el('div', 'mt-0.5 text-[11px] text-zinc-400 break-words');
         meta.textContent = item.sku ? String(item.sku) : '';
         
@@ -245,6 +307,30 @@
           const badge = el('span', 'ml-2 inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300');
           badge.textContent = 'Prod only';
           top.append(badge);
+        }
+
+        // Add hover event for cross-reference highlighting
+        if (opts.crossReferenceSkus && item.sku && opts.crossReferenceSkus.has(normalizeSku(item.sku))) {
+          row.addEventListener('mouseenter', function() {
+            // Find and highlight matching items in both columns
+            const section = row.closest('section');
+            const currentSku = row.getAttribute('data-sku');
+            const allRows = section.querySelectorAll('li');
+            allRows.forEach(otherRow => {
+              if (otherRow.getAttribute('data-sku') === currentSku) {
+                otherRow.classList.add('cross-reference-highlight');
+              }
+            });
+          });
+          
+          row.addEventListener('mouseleave', function() {
+            // Remove highlighting from all rows
+            const section = row.closest('section');
+            const allRows = section.querySelectorAll('li');
+            allRows.forEach(otherRow => {
+              otherRow.classList.remove('cross-reference-highlight');
+            });
+          });
         }
 
         top.prepend(left);
