@@ -3,12 +3,13 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Mosaic Commerce – Andrew Miller</title>
+  <title>Mosaic Commerce – Magento Development & ERP Integration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Magento development and ERP integration services. 17+ years of expertise in Adobe Commerce Cloud, Magento Open Source, Hyvä, and Business Central integration.">
   <!-- Neue Haas Grotesk -->
   <link rel="stylesheet" href="https://use.typekit.net/yhg1hur.css">
   <!-- Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DHT75ZWNZB"></script>
@@ -20,11 +21,30 @@
     gtag('config', 'G-DHT75ZWNZB');
   </script>
   <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1a1a1a;
+      --bg-glass: rgba(26, 26, 26, 0.7);
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      scroll-behavior: smooth;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background:
-        linear-gradient(rgba(20, 20, 20, 0.10), rgba(20, 20, 20, 0.15)),
-        url('./imgs/swissmtns.jpeg') no-repeat center center/cover;
-      font-family: 'Inter', Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
 
     .nhgd {
@@ -35,83 +55,146 @@
       font-family: "neue-haas-grotesk-text", "Neue Haas Grotesk Text", "Helvetica Neue", Arial, sans-serif;
     }
 
-    svg.mocologo {
-      width: 80px;
-      height: auto;
-      margin-right: 15px;
+    /* Glassmorphism container */
+    .glass-container {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
     }
 
+    /* Hero stacked title */
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+    }
+
+    /* Service highlight cards */
+    .service-highlight {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.3s ease;
+    }
+
+    .service-highlight:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .service-highlight:last-child {
+      border-bottom: none;
+    }
+
+    /* Service icon */
+    .service-icon {
+      font-size: 2rem;
+      font-weight: 300;
+      opacity: 0.8;
+      margin-right: 1rem;
+    }
+
+    /* CTA Button */
+    .btn-primary {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 1rem 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary::before {
+      content: '•';
+      font-size: 0.75rem;
+    }
+
+    /* Service list icon */
+    .service-list-icon {
+      width: 24px;
+      height: 24px;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    /* Contact form */
+    input, textarea {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 1rem;
+      border-radius: 8px;
+      width: 100%;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* Smooth scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.5;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+      }
+      
+      .service-highlight {
+        padding: 1.5rem 1rem;
+      }
+    }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center">
-
-  <main class="rounded-3xl shadow-2xl w-full max-w-7xl mx-4 my-8 p-0 
-               bg-white/20 border border-white/20 
-               backdrop-blur-md backdrop-saturate-150">
-    <!-- Header Bar 
-    <header class="w-full flex items-center px-10 pt-8 pb-8 border-b border-white/20">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" class="w-11 h-11 mr-3 flex-shrink-0 opacity-70">
-        <polygon points="12 5 21 19 3 19" />
-      </svg>
-      <h2 class="nhgd text-black text-3xl md:text-4xl m-0">
-        <span class="font-semibold">Mosaic</span>
-        <span class="font-light">Commerce</span>
-      </h2>
-    </header> -->
-    <div class="grid grid-cols-1 md:grid-cols-[45%_55%]">
-
-      <!-- Avatar + Name -->
-      <div
-        class="flex flex-col items-start justify-end px-10 pt-8 pb-2 order-1 md:order-none bg-white/20 rounded-tl-3xl rounded-tr-3xl md:rounded-tr-none">
-        <img src="./imgs/andrew_miller_MosaicCommerce_web-crop.jpg" alt="Andrew Miller"
-          class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-2" />
-        <a href="mailto:andrew@mosaiccommerce.io" class="flex items-center gap-2 text-white font-semibold text-lg pb-1 hover:opacity-80 focus:opacity-80 focus:outline-none transition-all">
-          <span class="border-b-2 border-dotted border-white/70">Get In Touch</span>
-          <svg class="w-6 h-6 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
-            <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </a>
-        <h1 class="text-black text-3xl font-light nhgd tracking-wide mt-2">Andrew Miller</h1>
-
+<body>
+  
+  <!-- Minimal Top Navigation -->
+  <nav class="fixed top-0 right-0 z-50 p-6 md:p-8">
+    <div class="flex items-center gap-6 text-sm nhgt">
+      <a href="#main" class="text-white/80 hover:text-white transition">Main</a>
+      <a href="#services" class="text-white/80 hover:text-white transition">Services</a>
+      <a href="#about" class="text-white/80 hover:text-white transition">About</a>
+      <a href="#contact" class="text-white/80 hover:text-white transition">Contact</a>
       </div>
-      <!-- Spacer for header on mobile -->
-      <div class="flex flex-col items-start justify-end px-10 pb-10 md:pb-2 order-6 md:order-none">
+  </nav>
 
-      </div>
-      <!-- Bio -->
-      <div
-        class="flex flex-col items-start justify-between px-10 pb-0 md:pb-8 order-2 md:order-none bg-white/20 md:rounded-bl-3xl">
-        <div>
-          <p class="text-black text-lg font-[500] nhgt">Designer. Developer. Creative Problem Solver.</p>
-          <p class="text-gray-800 text-base mb-8 max-w-lg leading-relaxed nhgt font-light text-sm">
-            With a degree in design and 17+ years of Magento experience—including deep expertise in both Adobe Commerce
-            Cloud (Enterprise) and Open Source—I blend creative vision with technical skill to help ecommerce businesses
-            grow. As founder of Mosaic Commerce, I’ve guided clients from startup to scale, specializing in modern
-            Magento builds, user-centered design, custom development, and seamless systems integration. I turn complex
-            needs into clear, actionable plans and deliver tailored, scalable solutions for ambitious brands and
-            established teams alike.
-          </p>
-        </div>
-
-      </div>
-      <!-- Buttons -->
-      <div class="flex flex-col items-start px-10 py-8 order-4 md:py-0 md:order-none nhgt">
-        <div class="flex items-center">
-          
-          <!-- Generic Logo Icon -->
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-            stroke="currentColor" class="w-24 h-24 mr-3 flex-shrink-0">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
-          </svg> -->
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" class="w-24 h-24 mr-3 flex-shrink-0 opacity-70">
-          <polygon points="12 5 21 19 3 19" />
-          </svg> -->
-          <!-- Logo Icon -->
-          <svg class="mocologo" width="100%" height="100%" viewBox="0 0 300 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+  <!-- Logo (top left, subtle) -->
+  <div class="fixed top-0 left-0 z-50 p-6 md:p-8">
+    <svg class="w-8 h-8 opacity-60" width="100%" height="100%" viewBox="0 0 300 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;fill:white;">
             <g transform="matrix(1,0,0,1,-2483.36,-1439)">
                 <g id="Logo-300" serif:id="Logo 300" transform="matrix(0.527446,0,0,0.527446,1217.96,679.502)">
                     <rect x="2399.12" y="1439.95" width="568.778" height="568.778" style="fill:none;"/>
@@ -126,34 +209,401 @@
                 </g>
             </g>
         </svg>
-          <h2 class="nhgd text-black text-3xl md:text-5xl m-0">
-            <span class="font-semibold">Mosaic</span>
-            <span class="font-light">Commerce</span>
-          </h2>
+  </div>
+
+  <!-- Hero Section - Split Layout -->
+  <section id="main" class="min-h-screen flex items-center justify-center px-6 md:px-12 lg:px-24 py-24 relative">
+    <div class="max-w-7xl w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        
+        <!-- Left: Stacked Title -->
+        <div>
+          <h1 class="hero-title nhgd text-white mb-8">
+            MOSAIC<br>
+            COMMERCE
+          </h1>
         </div>
-        <!-- <span class="text-gray-900 font-[500] mb-4 text-lg">Skills & Focus</span> -->
-        <div class="flex flex-wrap gap-4 tracking-wide my-8">
-          <a href="https://mage-os.org" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Magento</a>
-          <a href="https://business.adobe.com/products/commerce.html" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Adobe
-            Commerce Cloud</a>
-          <a href="#" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Systems
-            Integration</a>
-          <a href="https://mage-os.org" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">MageOS</a>
-          <a href="https://www.hyva.io" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Hyvä</a>
-          <a href="https://www.microsoft.com/en-us/dynamics-365/products/business-central" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Business
-            Central</a>
-          <a href="https://www.workato.com" target="_blank"
-            class="bg-white/20 hover:bg-white/50 text-gray-800 px-6 py-2 rounded-full text-base font-light shadow-sm border border-white/20 transition">Workato</a>
+
+        <!-- Right: Tagline & CTA -->
+        <div class="flex flex-col justify-center">
+          <p class="text-xl md:text-2xl text-white/90 mb-6 nhgt font-light leading-relaxed">
+            Transforming complex ecommerce needs into scalable, integrated solutions. Specializing in Magento, Adobe Commerce Cloud, and seamless systems integration.
+          </p>
+          <a href="#contact" class="btn-primary nhgt w-fit">Get Started</a>
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="scroll-indicator hidden md:block">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white/50">
+        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Service Highlights (Above the Fold) -->
+  <section class="px-6 md:px-12 lg:px-24 py-12">
+    <div class="max-w-7xl mx-auto">
+      <div class="glass-container p-8 md:p-12">
+        <div class="space-y-0">
+          
+          <!-- Service Highlight 1 -->
+          <div class="service-highlight">
+            <div class="flex items-start">
+              <span class="service-icon nhgd">+</span>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 nhgd">Enterprise Commerce</h3>
+                <p class="text-white/70 nhgt font-light leading-relaxed">
+                  Full-service Magento development and management for established brands scaling their ecommerce operations.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Highlight 2 -->
+          <div class="service-highlight">
+            <div class="flex items-start">
+              <span class="service-icon nhgd">+</span>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 nhgd">Systems Integration</h3>
+                <p class="text-white/70 nhgt font-light leading-relaxed">
+                  Connecting your storefront with business systems for seamless operations.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Highlight 3 -->
+          <div class="service-highlight">
+            <div class="flex items-start">
+              <span class="service-icon nhgd">+</span>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 nhgd">Modern Frontends</h3>
+                <p class="text-white/70 nhgt font-light leading-relaxed">
+                  Hyvä theme implementation and custom frontend development for faster, more engaging storefronts.
+                </p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-  </main>
+  </section>
+
+  <!-- Services Section (Main Content) - Split Layout -->
+  <section id="services" class="px-6 md:px-12 lg:px-24 py-20 md:py-32">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-12 lg:gap-16">
+        
+        <!-- Left: Section Heading -->
+        <div>
+          <h2 class="text-4xl md:text-5xl font-semibold nhgd mb-8">
+            A full cycle of ecommerce solutions.
+          </h2>
+        </div>
+
+        <!-- Right: Service List -->
+        <div class="space-y-8">
+          
+          <!-- Service 1: Magento Development -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">M</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Magento Development</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Custom development, theme implementation, and ongoing management for Magento Open Source and Adobe Commerce Cloud. From initial builds to long-term maintenance and optimization.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service 2: Systems Integration -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">→</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Systems Integration</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Integrating your ecommerce platform with business systems and third-party tools for seamless operations.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service 3: Hyvä Implementation -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">⚡</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Hyvä Implementation</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Modern frontend implementations using Hyvä Theme, Hyvä Checkout, and the full Hyvä ecosystem. Faster, more engaging storefronts that enhance user experience.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service 4: Platform Migration -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">⇄</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Platform Migration</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Expert migration from Adobe Commerce Cloud to Magento Open Source or between platforms. Full migration services including hosting setup, data migration, and deployment.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service 5: Systems Integration -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">⊞</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Systems Integration</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Connecting ecommerce platforms with third-party systems, CRMs, payment gateways, and business tools for unified operations.
+              </p>
+            </div>
+          </div>
+
+          <!-- Service 6: Custom Development -->
+          <div class="flex items-start gap-4">
+            <div class="service-list-icon flex items-center justify-center">
+              <span class="text-2xl nhgd opacity-70">◉</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-2 nhgd">Custom Development</h3>
+              <p class="text-white/70 nhgt font-light leading-relaxed">
+                Tailored solutions and extensions built to meet your specific business requirements. Custom Magento modules, API integrations, and specialized functionality.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Technology Badges -->
+      <div class="mt-16 flex flex-wrap gap-3 justify-center">
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Magento</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Adobe Commerce Cloud</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Hyvä</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">MageOS</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Business Central</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Workato</span>
+        <span class="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm nhgt text-white/80">Systems Integration</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Credentials Section -->
+  <section id="about" class="px-6 md:px-12 lg:px-24 py-20 md:py-32">
+    <div class="max-w-7xl mx-auto">
+      
+      <h2 class="text-4xl md:text-5xl font-semibold nhgd mb-16 text-center">
+        Experience & Results
+      </h2>
+
+      <!-- Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20">
+        <div class="text-center">
+          <div class="text-6xl md:text-7xl font-bold nhgd mb-4 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">17+</div>
+          <p class="text-lg font-medium nhgt mb-2">Magento & Ecommerce Experience</p>
+          <p class="text-white/60 nhgt font-light text-sm">Years of expertise building and managing ecommerce platforms</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl md:text-6xl font-bold nhgd mb-4 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Long-Term</div>
+          <p class="text-lg font-medium nhgt mb-2">Partnerships</p>
+          <p class="text-white/60 nhgt font-light text-sm">Supporting brands through growth phases</p>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl md:text-6xl font-bold nhgd mb-4 bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">Complex</div>
+          <p class="text-lg font-medium nhgt mb-2">Solutions</p>
+          <p class="text-white/60 nhgt font-light text-sm">Where others have failed</p>
+        </div>
+      </div>
+
+      <!-- Differentiators -->
+      <div class="glass-container p-8 md:p-12 max-w-4xl mx-auto">
+        <h3 class="text-2xl font-semibold mb-8 nhgd">What Sets Us Apart</h3>
+        <ul class="space-y-4 nhgt font-light text-white/80">
+          <li class="flex items-start">
+            <span class="text-white mr-3 mt-1">•</span>
+            <span>Deep expertise in both Adobe Commerce Cloud (Enterprise) and Magento Open Source platforms</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-white mr-3 mt-1">•</span>
+            <span>Proven track record solving complex ERP integration challenges that others couldn't—including single-handedly choosing the right integration path and building all Workato recipes for Trail-Gear's Business Central integration</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-white mr-3 mt-1">•</span>
+            <span>Detail-oriented approach with tight project management and client communication</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-white mr-3 mt-1">•</span>
+            <span>Experience guiding clients from startup to scale with tailored, scalable solutions</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-white mr-3 mt-1">•</span>
+            <span>Expertise in the full Hyvä ecosystem—Hyvä Theme, Hyvä Checkout, Hyvä Commerce, and Hyvä CMS</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="px-6 md:px-12 lg:px-24 py-20 md:py-32">
+    <div class="max-w-2xl mx-auto">
+      
+      <h2 class="text-4xl md:text-5xl font-semibold nhgd mb-6 text-center">
+        Get In Touch
+      </h2>
+      
+      <p class="text-white/70 text-center mb-12 nhgt font-light text-lg">
+        Ready to discuss your project? Let's turn your complex needs into clear, actionable plans.
+      </p>
+
+      <form id="contact-form" class="space-y-6" action="#" method="POST">
+        <div>
+          <label for="name" class="block text-sm font-medium mb-2 nhgt text-white/80">Name</label>
+          <input type="text" id="name" name="name" required placeholder="Your name" />
+        </div>
+        
+        <div>
+          <label for="email" class="block text-sm font-medium mb-2 nhgt text-white/80">Email</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com" />
+        </div>
+        
+        <div>
+          <label for="company" class="block text-sm font-medium mb-2 nhgt text-white/80">Company <span class="text-white/40">(Optional)</span></label>
+          <input type="text" id="company" name="company" placeholder="Your company" />
+        </div>
+        
+        <div>
+          <label for="message" class="block text-sm font-medium mb-2 nhgt text-white/80">Message</label>
+          <textarea id="message" name="message" rows="6" required placeholder="Tell us about your project..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn-primary nhgt w-full text-center justify-center">Send Message</button>
+      </form>
+
+      <div class="mt-8 text-center">
+        <p class="text-white/60 text-sm mb-4 nhgt">Or reach out directly:</p>
+        <a href="mailto:andrew@mosaiccommerce.io" class="text-white hover:text-white/80 transition nhgt font-medium inline-flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect width="20" height="16" x="2" y="4" rx="2" stroke="currentColor" />
+            <path d="M22 6 12 13 2 6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          andrew@mosaiccommerce.io
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-12 lg:px-24 py-16 border-t border-white/10">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        
+        <!-- Company Info -->
+        <div>
+          <div class="flex items-center mb-6">
+            <svg class="w-8 h-8 mr-3" width="100%" height="100%" viewBox="0 0 300 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;fill:white;opacity:0.8;">
+              <g transform="matrix(1,0,0,1,-2483.36,-1439)">
+                <g id="Logo-300" serif:id="Logo 300" transform="matrix(0.527446,0,0,0.527446,1217.96,679.502)">
+                  <rect x="2399.12" y="1439.95" width="568.778" height="568.778" style="fill:none;"/>
+                  <clipPath id="_clip2">
+                    <rect x="2399.12" y="1439.95" width="568.778" height="568.778"/>
+                  </clipPath>
+                  <g clip-path="url(#_clip2)">
+                    <g transform="matrix(2.01094,-2.01094,2.68469,2.68469,-22869.9,18693.2)">
+                      <path d="M10565.6,1540.55C10569.5,1537.63 10575.9,1537.63 10579.8,1540.55L10592.7,1550.26L10592.8,1550.24L10594,1551.12C10597.9,1554.04 10604.2,1554.04 10608.1,1551.12L10622.2,1540.53C10626.1,1537.6 10632.5,1537.6 10636.4,1540.53L10650.5,1551.12C10654.4,1554.04 10654.4,1558.79 10650.5,1561.71L10636.4,1572.31C10632.5,1575.23 10626.1,1575.23 10622.2,1572.31L10612.8,1565.2L10612.8,1565.26L10608.1,1561.74C10604.2,1558.82 10597.8,1558.82 10593.9,1561.74L10579.8,1572.33C10575.9,1575.26 10569.5,1575.26 10565.6,1572.33L10556.2,1565.26L10556.2,1565.31L10551.5,1561.76C10547.6,1558.84 10541.2,1558.84 10537.3,1561.76L10523.2,1572.36C10519.3,1575.28 10519.3,1580.03 10523.2,1582.95L10537.3,1593.54C10537.5,1593.67 10537.7,1593.79 10537.8,1593.9C10541.3,1596.84 10541.1,1601.31 10537.4,1604.11L10523.2,1614.7C10519.3,1617.63 10513,1617.63 10509.1,1614.7L10494.9,1604.11C10491,1601.19 10491,1596.44 10494.9,1593.52L10509.1,1582.92C10513,1580 10513,1575.26 10509.1,1572.33L10494.9,1561.74C10494.8,1561.61 10494.6,1561.49 10494.4,1561.38C10491,1558.44 10491.2,1553.97 10494.9,1551.17L10509,1540.58C10512.9,1537.65 10519.3,1537.65 10523.2,1540.58L10536.1,1550.27L10536.2,1550.26L10537.4,1551.15C10541.3,1554.07 10547.6,1554.07 10551.5,1551.15L10565.6,1540.55ZM10622.2,1582.92C10626.1,1580 10632.5,1580 10636.4,1582.92L10650.5,1593.52C10654.4,1596.44 10654.4,1601.19 10650.5,1604.11L10636.4,1614.7C10632.5,1617.63 10632.5,1622.37 10636.4,1625.3L10641.1,1628.81L10641.1,1628.87L10650.5,1635.91C10654.4,1638.84 10654.4,1643.59 10650.5,1646.51L10636.3,1657.1C10632.6,1659.9 10626.6,1660.02 10622.7,1657.46C10622.5,1657.33 10622.4,1657.2 10622.2,1657.08L10608.1,1646.48C10604.2,1643.56 10597.8,1643.56 10593.9,1646.48L10579.8,1657.08C10575.9,1660 10569.5,1660 10565.6,1657.08L10551.5,1646.48C10547.6,1643.56 10541.3,1643.56 10537.4,1646.48L10523.2,1657.08C10519.3,1660 10513,1660 10509.1,1657.08L10494.9,1646.48C10491,1643.56 10491,1638.81 10494.9,1635.89L10509.1,1625.3C10513,1622.37 10519.3,1622.37 10523.2,1625.3L10537.4,1635.89C10541.3,1638.81 10547.6,1638.81 10551.5,1635.89L10565.6,1625.3C10569.4,1622.5 10575.3,1622.38 10579.3,1624.94C10579.4,1625.07 10579.6,1625.2 10579.8,1625.32L10593.9,1635.91C10597.8,1638.84 10604.1,1638.84 10608,1635.91L10622.2,1625.32C10626.1,1622.4 10626.1,1617.65 10622.2,1614.73L10621,1613.83L10621,1613.81L10612.8,1607.63L10612.8,1607.68L10608,1604.14C10604.1,1601.21 10597.8,1601.21 10593.9,1604.14L10579.8,1614.73C10576,1617.53 10570,1617.65 10566.1,1615.09C10566,1614.96 10565.8,1614.83 10565.6,1614.7L10551.5,1604.11C10551.3,1603.99 10551.2,1603.87 10551,1603.75C10547.6,1600.81 10547.7,1596.34 10551.5,1593.54L10565.6,1582.95C10569.5,1580.03 10575.8,1580.03 10579.8,1582.95L10592.7,1592.64L10592.7,1592.63L10593.9,1593.52C10597.8,1596.44 10604.2,1596.44 10608.1,1593.52L10622.2,1582.92Z"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </svg>
+            <h3 class="nhgd text-xl font-semibold">Mosaic Commerce</h3>
+          </div>
+          <p class="text-white/60 nhgt font-light text-sm leading-relaxed">
+            Magento development and ERP integration for ambitious brands and established teams.
+          </p>
+        </div>
+
+        <!-- About -->
+        <div>
+          <h4 class="font-semibold mb-4 nhgd text-white/90">About</h4>
+          <div class="flex items-start gap-4 mb-4">
+            <img src="./imgs/andrew_miller_MosaicCommerce_web-crop.jpg" alt="Andrew Miller" 
+              class="w-16 h-16 rounded-full object-cover border border-white/10 flex-shrink-0 opacity-80" />
+            <div>
+              <p class="text-white font-medium mb-1 nhgt">Andrew Miller</p>
+              <p class="text-white/60 text-sm nhgt font-light">Founder</p>
+            </div>
+          </div>
+          <p class="text-white/60 nhgt font-light text-sm leading-relaxed">
+            Designer. Developer. Creative Problem Solver. With 17+ years of Magento experience, I turn complex needs into clear, actionable plans.
+          </p>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <h4 class="font-semibold mb-4 nhgd text-white/90">Contact</h4>
+          <ul class="space-y-2 nhgt font-light text-sm">
+            <li>
+              <a href="mailto:andrew@mosaiccommerce.io" class="text-white/60 hover:text-white transition">
+                andrew@mosaiccommerce.io
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="border-t border-white/10 pt-8 text-center">
+        <p class="text-white/40 text-sm nhgt font-light">
+          © 2025 Mosaic Commerce. All rights reserved.
+        </p>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    // Simple form handling (replace with actual backend/email service)
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // For now, just redirect to mailto link
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const company = document.getElementById('company').value;
+      const message = document.getElementById('message').value;
+      
+      const subject = encodeURIComponent('Contact from Mosaic Commerce Website');
+      const body = encodeURIComponent(
+        `Name: ${name}\n` +
+        `Email: ${email}\n` +
+        (company ? `Company: ${company}\n` : '') +
+        `\nMessage:\n${message}`
+      );
+      
+      window.location.href = `mailto:andrew@mosaiccommerce.io?subject=${subject}&body=${body}`;
+    });
+  </script>
+
 </body>
 
 </html>
