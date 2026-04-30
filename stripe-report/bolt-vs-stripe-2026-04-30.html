@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trail-Gear Payment Processing — Bolt vs. Stripe</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #1a2332;
+    --navy-light: #2a3a4e;
+    --slate: #4a5568;
+    --gray-100: #f7f8fa;
+    --gray-200: #edf0f4;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --white: #ffffff;
+    --bolt-color: #ef4444;
+    --stripe-color: #635bff;
+    --savings-color: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-blue: #3b82f6;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--gray-100);
+    color: var(--navy);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 36px; padding-bottom: 24px;
+    border-bottom: 2px solid var(--gray-200);
+  }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .header-logo { height: 40px; }
+  .header-title { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .header-subtitle { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+  .header-right { text-align: right; color: var(--gray-500); font-size: 13px; }
+  .header-right .date { font-weight: 600; color: var(--navy); font-size: 15px; }
+
+  h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--navy); }
+  h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--slate); }
+
+  /* Hero metrics */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .metric-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    border-top: 4px solid var(--gray-300);
+  }
+  .metric-card.bolt { border-top-color: var(--bolt-color); }
+  .metric-card.stripe { border-top-color: var(--stripe-color); }
+  .metric-card.savings { border-top-color: var(--savings-color); }
+  .metric-card.amber { border-top-color: var(--accent-amber); }
+  .metric-value {
+    font-size: 36px; font-weight: 800; line-height: 1.1;
+    margin-bottom: 6px; color: var(--navy);
+  }
+  .metric-card.bolt .metric-value { color: var(--bolt-color); }
+  .metric-card.stripe .metric-value { color: var(--stripe-color); }
+  .metric-card.savings .metric-value { color: var(--savings-color); }
+  .metric-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--gray-500);
+  }
+  .metric-sub { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+
+  /* Cards */
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow); margin-bottom: 24px;
+  }
+  .card-grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px;
+  }
+  @media (max-width: 800px) {
+    .card-grid-2 { grid-template-columns: 1fr; }
+    .charts-row { grid-template-columns: 1fr !important; }
+  }
+
+  /* Tables */
+  table {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  th {
+    text-align: left; padding: 10px 12px; font-weight: 600;
+    color: var(--gray-500); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 2px solid var(--gray-200);
+  }
+  th.right, td.right { text-align: right; }
+  td {
+    padding: 10px 12px; border-bottom: 1px solid var(--gray-100);
+    font-variant-numeric: tabular-nums;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.totals-row td {
+    font-weight: 700; border-top: 2px solid var(--gray-300);
+    border-bottom: none; padding-top: 12px; background: var(--gray-100);
+  }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600;
+  }
+  .pill.bolt { background: #fef2f2; color: var(--bolt-color); }
+  .pill.stripe { background: #eef2ff; color: var(--stripe-color); }
+
+  /* Section labels */
+  .section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--gray-500);
+    margin-bottom: 12px; margin-top: 8px;
+  }
+
+  .info-callout {
+    background: #fffbeb; border-left: 4px solid var(--accent-amber);
+    padding: 14px 18px; border-radius: 4px;
+    font-size: 13px; color: var(--slate); margin-bottom: 20px;
+  }
+  .info-callout strong { color: var(--navy); }
+
+  /* Charts */
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.tall { height: 340px; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding-top: 28px; margin-top: 24px;
+    border-top: 2px solid var(--gray-200);
+    color: var(--gray-500); font-size: 12px; line-height: 1.7;
+  }
+  .footer img { height: 22px; opacity: 0.5; margin-bottom: 8px; }
+
+  @media print {
+    body { background: white; }
+    .container { padding: 0; max-width: none; }
+    .metric-card, .card {
+      box-shadow: none; border: 1px solid var(--gray-300);
+      break-inside: avoid;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAABLCAIAAADWGA26AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kctLQkEUhz+16GVY1KJFgYS10ugBUZsgIyyQEDPIaqPXV6B2udcIaRu0DQqiNr0W9RfUNmgdBEURROvaFrUpuZ2rghE5w5zzzW/OOcycAWsorWT0mn7IZHNa0Od1zocXnHWvNNBFq9iWiKKr44GAn6rj8x6L6W89Zq3qcf+OplhcV8BSLzymqFpOeErYv5ZTTd4RbldSkZjwmbBbkwsK35l6tMQvJidL/G2yFgpOgLVF2Jn8xdFfrKS0jLC8HFcmvaqU72O+xB7Pzs2K75bViU4QH16cTDPJBMMMMCp2GA+D9MmOKvn9xfwZViRXEauSR2OZJClyuEVdlepx8QnR4zLT5M3+/+2rnhgaLFW3e6H22TDee6BuGwpbhvF1ZBiFY7A9wWW2kr9yCCMfom9VNNcBODbg/KqiRXfhYhM6HtWIFilKNlnWRALeTqE5DG030LhY6ln5nJMHCK3LV13D3j70Srxj6Qcu82fMKZHe7AAAAAlwSFlzAAALEwAACxMBAJqcGAAAGrRJREFUeJztnXtcE1f2wGcmTwjhFUAJhDcIZVUeWysP8UERRWxR+9G1CrKi6yqtLra6PopVUeujuz5Wy9Kt1QrVrogfEJSKLsUKFaWKIIsSQSKggrwTMA8ymd8f99fZ6UwyiZoKQr5/Ze499zGTM3funHvuGRjDMMiEiZEBMtgdMGHi1WFSdxMjCJO6mxhBmNTdxAjCpO4mRhAmdTcxgmAaqyKlUpmdnX3kyJEnT56Qst54442NGzeGh4fDMGys5kyYeAFgY9nd165du3//fl25HA7n4sWLkydPNkpbJky8GEZTd2dn50ePHtEI+Pv719TUGKUtEyZeDKOpO4PB0Gg09DJqtZrBYBilORMmXgDTq6qJEYTRXlWHFGKxODc3V2tWQkLC6NGjtWbl5uaKxWKtWR999NHr+Fy6dOlSZWUlMWX+/Plubm6D1J0hAGYkEET/g0KtVhurOXrOnDmjqw+HDx/WWgRFUXd3d12lFArFq+m5cVm1ahXpRC5evDjYnRpMRtxk5uLFi1rTq6qqJBLJq+2LiVfNiFP3e/fuaU3Pzs7GTL7Qwx3jqPvjx4/1mmWcnJyGwvS3sbGxp6eHlKjRaEpKSgajOyZeKcZR9x07duiV2bNnj1HaeknUavWRI0dIiSqV6sGDB4PSn9+UtLS0xl8zadKkwe7UoPKSc/+WlpadO3dyuVyaJkQi0fbt21/ZeypG+6oKQZCjo+PAwABR/ueff6Z3cHhNX1VNkDDIENnf33/s2LGDBw82NzcT09VqNYqi4Defz1+xYkVycrKjoyMMw0zm/2rGjTY9PT2HDx/+8ssvnz59Smpi3LhxW7ZsiY2NNaQ/LwAM/29B7cmTJ01NTR4eHnjuwYMHMcLEnShMA4qiLS0tdXV1FRUVTU1NAwMDIpEoMDDQ39/f1dWVzWbrKqhWqxsaGqqrq0tLS1tbW5VKpUAg8PX1DQkJ8fLyGjVqlK57D8Owhw8fNjY2Xr169fHjx729vVZWVs7Ozm+++aaPj49IJCJednCmXV1dxBRXV1cLCwtStSqVqqmpqbq6uqqqqrm5GUEQkUg0adIkLy8vZ2dnQ2xurw2G3BOffPKJ3nqOHDmit56FCxfS1MBisa5du/ZSN+8vUEf3sWPHEg8vXLiAC/f397NYLGKuj48PqTh1dG9tbZ09e7aFhQVVG8zMzAICAhoaGrT2TSwWjxkzRuvzEEEQKyurDRs2aH0SSqXSyMhIHo9HvRlgGDY3N4+NjZVKpcQiq1evZhPgcDiXLl0iVdvQ0BAWFmZmZkaqFoZhCwuL9957j/QkfK0xSN1FIhGNmgIePXqktx57e3v6SoKDg1/6jDBMm7qvXr2aeJiSkoIL37hxg5jl4eERFRVFKk5UdxRFT5w4MWrUKPpzYTAY27dv12g0xI5lZ2cLBAL6ghAERUZGkm6wsrIyQ/4FHx+f5uZmvBS93V2tVh86dMjS0pK+Tnd399u3bxvlfxl0DFJ3Qxx3URTVW49eywyfzzfKFJ+q7gcPHiQOw56enniHMzIyiJJr1qyZMmUKqThR+c6dO0czUSGxbt06XOPlcrmTkxNJwNbW1t7envR4gSAoPj4evxR9fX1jxowxsMXg4GC8t/Tq/s9//tPAOi0tLR88ePDy/8ugM1LUPTs7m6RS1dXVQHjOnDl4IgzDRUVFYWFhpOK4AlVWVlJV08nJKS0tbe/evaQpEwRBLBbr+vXroOyuXbuIWebm5sXFxVKpVCaTtbS0vPHGG6RL8fDhQ1Bw8+bNpGrHjh17/vz5+vr6zMxMOzs7Uu6VK1dAQRp1v3XrFvWmNTMzi4yMDAwMpP5TixYtevn/ZdAZKep+/vz5N998k5iyZ88eDMNUKpW1tTWeyOFw6urqJkyYQCqOq/uSJUtIWR988IFcLge5SqVy//79pNN0cnICU+qgoCBielxcHLHP9+7dIz5/YBguLS0Fdfr7+xML+vn59ff305zs/v37QZYudddoNDNnziSmwzC8cuXKp0+fgoLV1dUkzyIej9fa2vryf83gMjxdxKio1erk5OTExEQ8paysDIKg69evE1ed+Hy+s7OzWq3WWolUKv33v/9NTBEIBGlpafh7J5vN/stf/nLhwoVLly7hMo8ePSovL4+Kiuru7iaWrampuXbtmq+vr7W1NQzDY8aMEYvFuKULgiBHR0cIglAU/f3vf+/q6oqnv/vuu+bm5vghdXSn33gAQZBcLi8tLSWm2NnZ7dixw9bWFhyOHTv21KlTkZGR+Ophf3//mTNnkpOT6Wse4owUdccwbPHixX/+858VCgVIAc6PhYWFRLHY2FiiJpH47rvv8OKAlJQU4sMBMG/ePKK6QxB09erVqKiogICAxsZGPLG+vj48PJzD4YhEorlz586bNy84OJj6IDUzMzt+/LjW/qAo+sMPPyxbtoyULpPJdJ0CoLCwkCQTHx+P6zogLCysvLyceOfrtTQMfUaKukMQxGAw/Pz8cIfYxsbGvr6+8vJyogzJgEOiuLiYlBIeHk4VI83CIQi6desWBEFpaWn5+flEBdJoNHK5XCwW7969e/fu3Xw+39PTc8qUKSkpKS4uLqRKMAyrqqoqKyu7efOmRCJpbW198uQJ1SHCEPLz80kpU6dOJaWwWCzS9G8YoF/dW1paMH1rLi4uLnoXIx4+fEh8UmtFo9H09/frNY29MOPGjcPVXalUnjp1ijjcCoXCwMBAmuIPHz4kHiIIQlVKCIKo5hewXd3f33/RokUnTpzQdT1lMtnt27dv376dlZWVmZkZHR2ND/b/+c9/UlNTy8vL9f4XhnD//n1Sip+f38tXO/TRv2B24MABvTKGrEOtW7dOr4xCodDlsWgUZsyYQTz8/PPPm5qa8MPx48fTFyfdrjAMa32Jp975+Az42LFjhvgOdXR0zJ07F1fKbdu2RUVFgTU4qjDppdMQqP58w2rpVDd0J9na2rpt2zZ666xQKNy1a1dCQgKNTHNz89q1a3NycvT2BkXR+fPnZ2ZmPnv2TK/wCxAdHU00I5JeDUNDQ+mLE98XIQhCUZTkVQFoaWkhpYCXTgiCYBhet25dc3NzXl7e5s2bJ0+eTF3SB8jl8n379kEQ1NjYuG/fPpKiBwQEpKWlXb58uaWl5dy5c/TdpuLt7U1KuXv37vNW8loik8k+//xzX19fi19jZmaGy1hZWW3atEksFstkMplMJpfLFb+Am3g6Ozs//fRTDw8PUj1cLhcfAu3t7T/77DOJRCKTyfr6+vBK+vr6Kioq/vCHP+AtwjDM4XDMzMzweiwtLd96662zZ88aYm+i2uZyc3NB1ttvv63rUlRUVAAZksUQ+sUQefjwYVL6rl27qK1/+eWXJLGNGzfq6iqKorW1tf/4xz8iIiJIFkwrKyuNRrNx40ZiIoPB2LlzJ3FhXy6Xk5pbsWIFyNJliDx58iQpnbjMDJDJZHFxceEEli9fbsjFH8pAn332ma6/HweYqOmh2geo0CurRqOZOHEifQ0wDOOrNjTQqDtVZQGjRo3Ci+tS976+PqpG4kZ3nJiYGFLxwsLC8vJyLpfLIXD8+HFSQepDsre3l/Q27O3tTSpVVVVFKqVX3RUKBY/HI51Id3c3sVqJRMLhcIgy8fHxeq/8EAdJT0/X+vcTef/99/XKFBQU6JWhd7aGYVhvZzAM27Rpk96GaAgODtaaPn/+fL1leTweSay3t3fDhg34oUaj2bdv3+XLl4kyAoEgNDTUzs5OpVIpCZBM+BAEkSY24OFGWgSQSqWkV4hDhw7p7TkJFotFmrlJpdIPPvigr68PHDY1NcXGxiqVSqLMn/70p+dt6LWE5Oek/b4xxtZsqVSqd+XV29tb7wouzeje2dlJ7SoMw99//z1eXNfojmFYeXk51TAfFhZ24MCBI0eOxMbGkirncrmFhYUYhqnV6nHjxpEaXbZsWUlJSU1Nzc8//3zgwAGSm+R7772HYdiHH35Iam7evHlXr16trKwsLCycN28e9XT0ju4YhpWVlVFfG4RC4cKFC9955x2qH9vEiRP16sDQBzKE4aTuGIZRY/ex2Wyivy6NumMYlpeXZ+AuRBiGk5KS8KvX3d1NmkLQwGazKysrMQyrra0lebFTWyGlJCUlgRbpXcQyMjIMjNqJIAjVc/h1ZESYn0isX7+elCIQCAxxrwXExMRkZWXpsqgQSU1NPXz4MK5S1tbWmZmZ9Du/AGw2++DBg8DhzNvbe8GCBTTCq1atsrKyIqZ0dHTobQKCoMTExKNHjxJtEloxNzfPzc2lecUfbryOozv8a/Ly8vBcjUYD3FRwNm/eTCwOFvOJULd3VFRUxMXFaR2tORxOREREXl6e1ut2+/btWbNmkRQUh8ViTZo0qaCggFhErVZ//PHHVN8YgUCwfv36/v7+hIQEYm9FIlFHRweGYcnJyaQTocaZuXLlSkxMjNabkMvlzp49e9g4u2MYZtCzTKPR6H3qGSVGpEwms7GxoV989fb2JjkPDiIajSYrK6ugoKCurk6lUnl5eU2ePDkpKcnGxoa+oEqlOnfuXF5eXl1dXXt7u4WFhaenZ1RUVHx8vK5FZZVKlZubW1RU1NbW5urqOmnSpPnz5xsrhrhKpfr666+Lioru37+Poqinp+esWbPi4+MNn329FpjU3cQIAqE6eFBpbW3VK6N3T5qbm5veiYpEItHrVyMUCk26buLFQJYvX65XiGohpjJr1iy6ZhDkb3/7G30NKIpSXyJJMJnM1NRUvZ0xYUI7Mpns008/pZ9rWllZpaWl9fT00LwEdHZ2pqSkaHUWd3Z2/uKLL+jfLyUSSXx8PH1XPT09T506Zey3FxMjiP8PqIKi6MDAAEm9Hj9+nJWVtW/fPrDYhiAI1Wjl6Oi4ZMmSdevWgQVntVpN3QrEZrPB9KOlpWXr1q15eXlUN49nz56Bnri6um7btm3GjBlU2wWHwzF93cnEy6A/flBKSopeH+Cvv/76j3/8o97GYmNjz58/TyPAYDB+/PFHvZ6Jz4tKperu7q6tra2rq+vp6REKheHh4Q4ODobYzk0MK/SO/0SPcF2IRCJDHiV6zXM8Hq+3t/flnldkLl26FBQUxOfziQ0xmUwXF5e1a9dSHbxMDGMMig6HIIheMRRF9RpMmEwmveGFz+d3d3cbK1CwQqHYuHEjiBz0zjvvREdHOzs7m5ubt7W1lZWV5eTkiMXit99++5tvvhEKhUZp0cRQx6B74nULvAFYunQpBEEuLi737t2j5spksmnTpiEIMnPmTGO1aGKIM2zV/cyZMywWy8fHByyna0WlUoWHhzMYjMuXLxulURNDnOGp7l1dXQKBgMlkAudbGq5cuQJBkI+Pz6uMx21isBiegTdu3rzZ3d09c+ZM0l5sKhEREdOnT+/u7u7q6iLGUZFKpTdu3Pj222/v3bvH4/EmTJiwZMkSDw8P4lbX/v7+CxcuiESiiRMndnZ2XrhwoaCgoKurKyIiYunSpUKhEIZhFEUfPXqUlZX1008/KZXKGTNmLF68mBhOtaSkpK2tbcGCBWq1+s6dO8eOHaupqXFyclq6dGloaCgw7/b29paVlZ0+ffrBgwfe3t5JSUkTJkygegXLZLLKysqjR4+KxWI+nx8YGJiYmOjt7U2ULC0tbWlpAfsku7q6qqurb968OW/ePPA5PgzDHj16VFBQUFhY2Nzc7ODgEBMTM3fuXK0r2e3t7cXFxdnZ2c3NzY6OjlFRUXFxcYYs0g8mhtwTr93onpSUBEHQN99882LFi4uLQVxzHo8XHBzs6+vLYDBYLFZERERnZycu1tjYaGFhkZCQcPPmTScnJxCHA7gW2tjYlJSUYBi2ZcsWc3NzGIaBAARB9vb2d+7cwSsBu8UHBgYWLFjA4XD4fD7QGARBZsyYoVAoHjx44OPjAzoDIh8xmcw5c+aQLlRdXd2YMWNgGLa2tp48eXJQUBAMw1wud9GiRUTHzDlz5jAYDAzDcnJy8LB4uJtkWloaWO4YPXp0SEgIsKTx+fytW7eSLlFGRgYYHTw8PKZNm+bj4wOa3r17tyH+s4OFcQJe+/j46K3EkIgaQUFBL31GmEajAZaWGzduvEDxoqIiEJX35MmTfX19ILGpqWn9+vXAsxd3BgbqPnHiRJFIlJycLJFIQOtnz54Fe8nXr19vb29/4sQJsA10YGAgIyODxWJZW1u3t7eDSqKjo5lM5po1a8aPH5+XlwdGDYlEAnYJfvzxx66urvHx8Xfu3AFZ1dXVYHvKV199hfe5pqbGxsbG09MzJycH37X99OnTNWvWgD1TeCJQ98rKSktLy5iYmOPHj1+8eLG9vR1F0U8++QSG4aioqIqKClxlr1+/DjzdDx06hDeXlZXFZrOnTZt248YNIKnRaGpqaqKiorhc7pkzZ17gsr8aDFJ3+u2hTCZT79o+eI7T6zqHwwEj4kuCh2J8gRCecrncy8vL2tqaGt9Zo9F89NFHMAyvWrUK/MdA3SEIWrt2LWlIAw5CCILk5OSQ6gEqWFxcDA6jo6MhCLK1tQXhq3DwyVVQUBBpcaChoYHH482aNQscKpXKoKAgFoul9fYGDzoQXRXDsDlz5oBheMOGDUSxxsZGHo8XGhpKraGrq0soFDo7O6tUKgzD7t+/z2QynZ2dSVu5MQzr7+93c3NjsVh4aNWhhkHqLpfL9+/fr9Xn0cXF5dtvv6WfgTQ0NMydO5d+RuTt7Z2fn2+UU6qvrwd14mOz4Zw9exaEgtGaOzAwEBAQYG9vD/5OoO6urq5KpZIkWVpaiiBISEgI9ckO4u1kZmaCQ6Du6enpJDGFQgGC7/3444+krJ6eHkdHR19fX3CYnZ0N/TqQPJGqqioEQT788ENwCKJ7u7i4AK8NnNmzZ0MQRNywSwREQj137hyGYeAD4niQEhLZ2dkwDJ8+fVpr7qDzHJ8iAwENSeCXuKmp6f333x89ejSXAq7o7u7up0+ffvr0KbUeI54SPmsi/aOGAOIUgE2iWklNTUUQ5KeffsJ+Ufe5c+dSxW7dusVkMpOTk6lZRUVFEARlZGSAQxAZj3pnqtXqwMBADodDVWK5XO7i4uLu7g4Ok5KSWCwWmEpR6e3tZTKZbm5u4BCo+3fffUeUaW9vh2FYKBSC8ZtKX1+fRCIBC96BgYFCoZA6tAOqq6tZLNbKlSu15g46z2GZAa8+unLXrVun1084PT0dDGa/KbirwrNnz/RuxCQilUpv3rxpYWFBChlAJCAgQKPRXL58OSQkBKTQON4Y6JPDZDJ1bRoyxCvu7t271tbWUqlU61e/MQyzsLCQSCQ9PT14sGJSnD0wcwsPD6d+qQHA4/FADzEMq62tdXNz6+jo0BqNVSaTIQhy584d+j4PFkYzRJKCq2jlrbfeMlZzNNja2nI4HKVS2dbWZsiHkHB6e3shCHJ1daXxhgDzaUP8iF4ZPT09HR0dISEhum4MEIGwra0NqDuDwSDtD5RKpRAEaQ3vSqKzs1OpVNbX1+uKHYthmFKppH5ZcYhgNHUnxerXCslP6zeCyWROmzatsLBQLBZTY09T2bFjx969e/Pz8z09PSEIwgxwIhpqfsgODg5///vfSUG/SJC+xkHFkBMHeHl57dy5k0aAJkb+4DI8l5ni4uK+//778+fPx8XF6RUuKSmRy+XW1taWlpYIgrS0tKAoqmuJoL29HaLERh1crK2tu7u7Y2NjXzhQOCioNbwrCYFAAL5Z+e6779JHvxmaDM9Nn9HR0WZmZllZWdRgvCTEYnFJSQmbzfb09LS0tAwODpZKpTU1Nbrkq6urYRjWa1R9lQC/oP7+/heuAXxR+YcfftC1ub62ttbT03Pfvn0wDPv6+nZ1db1Mc4PI8FR3kUi0dOlShUKRmJio60NLEARhGJaSkoKi6K5du8Br5ZYtW2AYPnHihFZ5FEXPnDljZ2c3pEb36dOnDwwMbNmyRWtuW1ubjY0N9VuCROzs7GbPnt3e3q4r0OdXX3314MEDEFxt6tSpra2tFRUVWiUrKiqsrKy2bt36fOfwyjCWiccoYZWMC/iAXkJCgtZVD6lUunnzZhiGiUu5crncz8/P1tb2v//9L0lerVaD2NOrVq0CKbgTAbVyYIj861//Ss2iGiJZLBZVDBgiLS0tqVkkQ6RCofD19YUgiBrXTqPRgAWvL774AqTgTgQk6uvreTxeSEiITCYjZT18+NDOzs7LywscVlZWmpubOzg4kNbFMAzr7+8Hhs6ysjJqE0OB4azu7e3tXl5eEATZ29sfOnSIaMDOz88HTlH29vakr7mXl5ezWCwLCwvimotKpVq5ciWDwQgNDcUX5IeIumMYVl1dzeVyzc3Njx8/TjzNTZs2MRgMgUCAK7EudddoNCD2qre3N/ED6Hfv3gU+PMeOHcMTT5w4gSCIm5sb/m1aDMMUCgWI9L18+XJDHKgGBaOpu15XuN/97nfGastwnj59mpqaCiYqXC7XycnJzc0NeEGx2ezExMTGxkZqqZKSEj8/PxiGfXx8pk2bBja2MhiMxYsXP378GBcbOuqOYVhZWVlAQAAMw25ubmFhYRMmTAD/yPTp04kPN13qDlrcu3cveBMdP378lClTxo8fz+FweDxeRkYGUYMHBgaOHj06evRoJpPp7+8/adKkgIAAPp/PYDDWrl2ra61qKMAw1jTr8ePH165d05XL5XIzMzPd3d2N0pbh8Hi8qVOnrlixAljTzc3Nwdft4uPjDx8+vGzZMupnIiEIcnNzW7FihZeXV0dHh0wmYzKZoaGhBw4cWL16NdGWiiCIUCicMmUKeNUjAvbCTp48mepdx2azPTw8IiIiHBwcIAiytLQMDQ2lfuMOhmEbG5uIiAhqQHoYhgUCwdSpU4kfkwKvK35+fh0dHQqFAijinj17tm/fTlzD4vP5ISEhWj+phyBIWFgYWKPt6elRKBRWVlYLFy48efJkREQE0faKIEhgYOCSJUscHBw6OzvBxxEiIyP/9a9/JSQkGGvv5W+BQXtVDQFF0fT09NTUVOpim5eXV3p6+lAIIQtu8ecKQgYCBg41Qzs9wMDyMrHWwIUy8MRfo0tkNHXHoVb4WlwIEyMB46u7CRNDluFpdzdhQismdTcxgjCpu4kRhEndTYwgTOpuYgRhUncTI4j/A6njWolji340AAAAAElFTkSuQmCC" alt="Mosaic Commerce" class="header-logo">
+      <div>
+        <div class="header-title">Trail-Gear Payment Processing</div>
+        <div class="header-subtitle">Bolt vs. Stripe — 90-Day Analysis</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="date">April 30, 2026</div>
+      <div>Period: Jan 30 – Apr 30, 2026</div>
+    </div>
+  </div>
+
+  <!-- Hero metrics -->
+  <div class="section-title">Headline Numbers</div>
+  <div class="metrics-row">
+    <div class="metric-card bolt">
+      <div class="metric-value">2.91%</div>
+      <div class="metric-label">Bolt Blended Rate</div>
+      <div class="metric-sub">$58,266 in fees over 90 days</div>
+    </div>
+    <div class="metric-card stripe">
+      <div class="metric-value">2.51%</div>
+      <div class="metric-label">Stripe Modeled Rate</div>
+      <div class="metric-sub">$50,289 modeled on same volume</div>
+    </div>
+    <div class="metric-card savings">
+      <div class="metric-value">$7,978</div>
+      <div class="metric-label">90-Day Cost Difference</div>
+      <div class="metric-sub">Bolt minus Stripe</div>
+    </div>
+    <div class="metric-card savings">
+      <div class="metric-value">~$32K</div>
+      <div class="metric-label">Annualized Difference</div>
+      <div class="metric-sub">90-day delta × 4</div>
+    </div>
+  </div>
+
+  <!-- Volume metrics -->
+  <div class="section-title">Credit-Card Volume (Period)</div>
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-value">4,662</div>
+      <div class="metric-label">Completed CC Transactions</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$2.00M</div>
+      <div class="metric-label">Gross CC Sales</div>
+      <div class="metric-sub">$2,004,844.32 exact</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">$430</div>
+      <div class="metric-label">Average Order Value</div>
+    </div>
+  </div>
+
+  <!-- Comparison + Bolt fee anatomy -->
+  <div class="card-grid-2">
+    <div class="card">
+      <h2>Side-by-Side Total Fees (90 Days)</h2>
+      <div class="chart-wrap tall"><canvas id="comparisonChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Bolt Fee Anatomy</h2>
+      <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+        Bolt charges three fees on every credit-card transaction. The risk fee
+        does not appear in the Bolt merchant dashboard's transaction export —
+        it shows only on the monthly statements.
+      </p>
+      <div class="chart-wrap"><canvas id="anatomyChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Stripe quote -->
+  <div class="card">
+    <h2>Stripe's Quote on File</h2>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      Quote received Nov 18, 2025 from Thomas Garces (Stripe). Original deal terms (24-month, exclusivity)
+      tied to a now-expired EOY 2025 deadline. A refreshed quote is expected in the upcoming Stripe meeting.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Card type</th>
+          <th class="right">Per-transaction rate</th>
+          <th class="right">Period volume</th>
+          <th class="right">Period transactions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Non-Amex CNP (Visa, MC, Discover)</td>
+          <td class="right">2.40% + $0.20</td>
+          <td class="right">$1,850,104</td>
+          <td class="right">4,319</td>
+        </tr>
+        <tr>
+          <td>American Express CNP</td>
+          <td class="right">2.90% + $0.30</td>
+          <td class="right">$154,740</td>
+          <td class="right">343</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="font-size:12px; color:var(--gray-500); padding-top:14px;">
+            Note: A subsequent fee analysis Stripe sent on Dec 8, 2025 modeled non-Amex at 2.40% + $0.30 (not + $0.20).
+            The discrepancy will be confirmed.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Card brand breakdown -->
+  <div class="card">
+    <h2>Bolt Fees by Card Brand (Period)</h2>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      Bolt's <em>processing fee</em> column varies by card brand exactly as interchange does — Amex is noticeably
+      higher. Bolt's <em>platform fee</em> column is essentially flat (~0.43%) regardless of brand. Effective % below
+      reflects only the export's two visible fee columns; the risk fee adjustment lifts each row by ~0.18 pp.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Card brand</th>
+          <th class="right">Transactions</th>
+          <th class="right">Sales</th>
+          <th class="right">Processing fee</th>
+          <th class="right">Platform fee</th>
+          <th class="right">Effective %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Visa</td>
+          <td class="right">3,128</td>
+          <td class="right">$1,222,912</td>
+          <td class="right">$27,672</td>
+          <td class="right">$5,419</td>
+          <td class="right">2.71%</td>
+        </tr>
+        <tr>
+          <td>Mastercard</td>
+          <td class="right">1,073</td>
+          <td class="right">$583,436</td>
+          <td class="right">$12,912</td>
+          <td class="right">$2,379</td>
+          <td class="right">2.62%</td>
+        </tr>
+        <tr>
+          <td>American Express</td>
+          <td class="right">343</td>
+          <td class="right">$154,740</td>
+          <td class="right">$4,273</td>
+          <td class="right">$680</td>
+          <td class="right">3.20%</td>
+        </tr>
+        <tr>
+          <td>Discover</td>
+          <td class="right">118</td>
+          <td class="right">$43,757</td>
+          <td class="right">$990</td>
+          <td class="right">$196</td>
+          <td class="right">2.71%</td>
+        </tr>
+        <tr class="totals-row">
+          <td>Total</td>
+          <td class="right">4,662</td>
+          <td class="right">$2,004,844</td>
+          <td class="right">$45,847</td>
+          <td class="right">$8,674</td>
+          <td class="right">2.72%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Two-tier platform fee + Other rails -->
+  <div class="card-grid-2">
+    <div class="card">
+      <h2>Bolt's Two-Tier Platform Fee</h2>
+      <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+        Looking at every individual transaction's platform fee as a percentage of the sale amount,
+        Bolt's platform fee comes in at <strong>one of two distinct rates</strong> — never anywhere in
+        between. This pattern is consistent across all card brands and order sizes. Neither file exposes
+        a column flagging which transactions land in which tier; the pattern is consistent with how Bolt
+        is documented to charge an additional Network premium when shoppers check out via a Bolt account
+        (versus guest checkout), but the data alone cannot confirm that interpretation. <strong>This entire
+        fee category disappears under any non-Bolt processor.</strong>
+      </p>
+      <div class="chart-wrap"><canvas id="bimodalChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Other Payment Rails (Informational)</h2>
+      <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+        Trail-Gear also accepts PayPal and Amazon Pay through Bolt. These flow through PayPal and Amazon
+        respectively; Bolt only collects its 0.25% platform fee on top.
+        <strong>A move to Stripe would not affect these rails</strong> — they continue at their own rates regardless
+        of which checkout layer is in use.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Rail</th>
+            <th class="right">Transactions</th>
+            <th class="right">Sales</th>
+            <th class="right">Bolt take</th>
+            <th class="right">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>PayPal</td><td class="right">983</td><td class="right">$287,559</td><td class="right">$719</td><td class="right">0.25%</td></tr>
+          <tr><td>Amazon Pay</td><td class="right">100</td><td class="right">$27,999</td><td class="right">$70</td><td class="right">0.25%</td></tr>
+        </tbody>
+      </table>
+      <h3 style="margin-top:24px;">Refunds & Chargebacks</h3>
+      <table>
+        <tbody>
+          <tr><td>Refunds (CC, est.)</td><td class="right">~210</td><td class="right">~$85,000</td></tr>
+          <tr><td>Open chargebacks</td><td class="right">2</td><td class="right">$1,574</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:10px;">
+        Bolt does not return processing or platform fees on refunded transactions in any meaningful amount.
+        Stripe's policy is similar — both processors retain the percentage portion on refunds.
+      </p>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="card" style="background: var(--gray-100);">
+    <h2 style="margin-bottom:14px;">Methodology</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:30%;color:var(--gray-500);"><strong>Window</strong></td><td>January 30, 2026 – April 30, 2026 (90 days)</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Filter</strong></td><td><code>status = completed</code> only (failed and rejected transactions excluded; neither processor charges fees on declines)</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Stripe-comparable scope</strong></td><td><code>cc_payment</code> only (PayPal and Amazon Pay flow through their own networks regardless of checkout layer)</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Refund handling</strong></td><td>Refund amounts netted from gross volume using Jan–Mar 2026 statements as proxy</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Risk-fee adjustment</strong></td><td>Risk fee not in transaction export; estimated by applying its statement-derived ratio (8.17% of processing fee) to the export's processing-fee total</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Stripe modeling</strong></td><td>Applied 2.40% + $0.30 (Non-Amex CNP) and 2.90% + $0.30 (Amex CNP) per the Nov 18, 2025 quote</td></tr>
+        <tr><td style="color:var(--gray-500);"><strong>Source data</strong></td><td>bolt_export_4_30_2026.csv (6,556 rows); 3 monthly statements (Jan/Feb/Mar 2026); Trail-Gear + Stripe Pricing.pdf</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <img src="data:image/png;base64,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" alt="Mosaic Commerce">
+    <div>Prepared by Mosaic Commerce for Trail-Gear · April 30, 2026</div>
+  </div>
+
+</div>
+
+<script>
+const baseFontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+Chart.defaults.font.family = baseFontFamily;
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#4a5568';
+
+// === Comparison chart: stacked bars Bolt vs Stripe ===
+new Chart(document.getElementById('comparisonChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Bolt (actual)', 'Stripe (modeled)'],
+    datasets: [
+      {
+        label: 'Processing / percentage fees',
+        data: [45847, 48890],
+        backgroundColor: '#1a2332',
+        stack: 'a'
+      },
+      {
+        label: 'Platform fee (Bolt only)',
+        data: [8674, 0],
+        backgroundColor: '#ef4444',
+        stack: 'a'
+      },
+      {
+        label: 'Risk fee (Bolt only)',
+        data: [3746, 0],
+        backgroundColor: '#f59e0b',
+        stack: 'a'
+      },
+      {
+        label: 'Per-transaction fixed ($0.30)',
+        data: [0, 1399],
+        backgroundColor: '#635bff',
+        stack: 'a'
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: {
+        stacked: true, beginAtZero: true,
+        ticks: { callback: v => '$' + v.toLocaleString() },
+        grid: { color: '#edf0f4' }
+      },
+      x: { stacked: true, grid: { display: false } }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString()
+        }
+      }
+    }
+  }
+});
+
+// === Bolt fee anatomy: donut ===
+new Chart(document.getElementById('anatomyChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Processing fee (78.7%)', 'Platform fee (14.9%)', 'Risk fee (6.4%)'],
+    datasets: [{
+      data: [45847, 8674, 3746],
+      backgroundColor: ['#1a2332', '#ef4444', '#f59e0b'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.label.split(' (')[0] + ': $' + ctx.parsed.toLocaleString()
+        }
+      }
+    },
+    cutout: '60%'
+  }
+});
+
+// === Two-tier platform fee chart ===
+new Chart(document.getElementById('bimodalChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Lower tier (~0.25%)', 'Higher tier (~0.50%)'],
+    datasets: [{
+      label: 'Number of CC transactions',
+      data: [398, 4255],
+      backgroundColor: ['#3b82f6', '#ef4444'],
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { callback: v => v.toLocaleString() },
+        grid: { color: '#edf0f4' }
+      },
+      x: { grid: { display: false } }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.parsed.y.toLocaleString() + ' transactions'
+        }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
