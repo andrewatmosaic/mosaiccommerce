@@ -199,6 +199,15 @@
     </div>
   </div>
 
+  <!-- Apples-to-apples caveat -->
+  <div class="info-callout" style="margin-bottom:32px;">
+    <strong>Important caveat: this top-line comparison is not yet apples-to-apples.</strong>
+    Bolt's 2.91% blended rate includes a "risk fee" (~0.19 pp) that funds Bolt's chargeback liability protection — Bolt absorbs the cost of fraudulent chargebacks they approved.
+    Stripe's quoted 2.51% includes no equivalent liability transfer; Stripe's <strong>Chargeback Protection</strong> is a separate paid product (~0.4%/transaction) that is <strong>not</strong> on the current quote.
+    Adjusted for this, the realistic annualized savings range from roughly <strong>$0/year</strong> (if Stripe Chargeback Protection is added at 0.4%) to <strong>~$26k/year</strong> (if Trail-Gear self-insures and absorbs chargebacks directly), with strict-apples-to-apples processing-only savings around <strong>~$17k/year</strong>.
+    The three scenarios are detailed in the "Three Scenarios for Evaluating the Savings" section below.
+  </div>
+
   <!-- Volume metrics -->
   <div class="section-title">Credit-Card Volume (Period)</div>
   <div class="metrics-row">
@@ -387,6 +396,128 @@
         Stripe's policy is similar — both processors retain the percentage portion on refunds.
       </p>
     </div>
+  </div>
+
+  <!-- About Chargeback Protection -->
+  <div class="card">
+    <h2>About Chargeback Protection</h2>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      This section explains why the top-line comparison carries a caveat, and how to think about the three scenarios that follow.
+    </p>
+
+    <h3>What Bolt provides today</h3>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      Bolt's "Fraud Protection" product carries what Bolt calls a <strong>Zero-Fraud Guarantee</strong>: when a transaction Bolt has approved later turns into a fraudulent chargeback, Bolt absorbs the loss instead of Trail-Gear. Bolt funds this guarantee through the <strong>risk fee</strong> on Trail-Gear's monthly statements (~$3,746 over the 90-day window, ~$15,000 annualized at current volume). The risk fee is therefore <strong>liability insurance</strong>, not a fraud-screening fee.
+    </p>
+
+    <h3>What's in (and not in) Stripe's current quote</h3>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      Stripe's quote includes <strong>baseline Radar</strong> at $0.05/tx, which is fraud detection — machine-learning risk scoring that auto-blocks the highest-risk transactions. <strong>Baseline Radar is fraud screening, not liability transfer.</strong> If a fraudulent transaction passes Radar's screening and the cardholder later disputes it, Trail-Gear loses the sale, the product, and pays the $15 dispute fee — Stripe does not absorb the loss.
+    </p>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      To replicate the liability-transfer behavior Bolt's risk fee buys, Trail-Gear would need Stripe's separate <strong>Chargeback Protection</strong> product, <strong>not on the current quote</strong>:
+    </p>
+    <ul style="font-size:13px;color:var(--slate);margin-bottom:14px;padding-left:24px;">
+      <li><strong>Pricing:</strong> ~0.4% per successful transaction (per Stripe's published documentation; Trail-Gear's pricing to be confirmed with Stripe).</li>
+      <li><strong>Coverage:</strong> Stripe reimburses the disputed amount and waives the $15 dispute fee — for fraud disputes only. Non-fraud disputes (e.g., "product not received," "not as described") are <strong>not</strong> covered.</li>
+      <li><strong>Annual cap:</strong> Reimbursements capped at $25,000 per merchant account per year (US).</li>
+      <li><strong>Eligibility:</strong> Stripe's published criteria require a minimum of six months of processing on Stripe before a merchant becomes eligible — meaning Trail-Gear may not be able to enable Chargeback Protection at launch. Confirming this is one of the open questions.</li>
+    </ul>
+
+    <h3>Trail-Gear's actual chargeback exposure</h3>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      Whether Chargeback Protection is worth its cost depends on Trail-Gear's actual chargeback rate.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th class="right">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Open chargebacks (90 days)</td><td class="right">2</td></tr>
+        <tr><td>Total disputed amount</td><td class="right">$1,574</td></tr>
+        <tr><td>Annualized chargeback exposure (× 4)</td><td class="right">~$6,300</td></tr>
+        <tr><td>Chargeback rate (% of CC transactions)</td><td class="right">0.04%</td></tr>
+        <tr><td>Card-network "danger" threshold</td><td class="right">1.0%</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--slate);margin-top:14px;">
+      Trail-Gear's chargeback rate is <strong>far below</strong> any threshold that would put the merchant account at risk with the card networks. At an annualized exposure of ~$6,300:
+    </p>
+    <ul style="font-size:13px;color:var(--slate);margin-bottom:14px;padding-left:24px;">
+      <li><strong>Bolt's risk fee</strong> at ~$15,000/year is charging Trail-Gear roughly <strong>2.4×</strong> the actual chargeback exposure to insure against it. That is normal margin for a chargeback-protection product.</li>
+      <li><strong>Stripe Chargeback Protection</strong> at 0.4% on this volume would run ~$32,000/year — also more than the underlying exposure, but again, this is the cost of insurance.</li>
+      <li><strong>Self-insuring on Stripe</strong> (skipping Chargeback Protection and absorbing the ~$6,300/year directly) is mathematically the cheapest option at Trail-Gear's current chargeback rate. The tradeoff is operational: the Trail-Gear team handles disputes when they happen and accepts variance month-to-month.</li>
+    </ul>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      This is a judgment call for Anna and Daniel, not just a math problem.
+    </p>
+
+    <h3>What we don't yet know</h3>
+    <ol style="font-size:13px;color:var(--slate);margin-bottom:0;padding-left:24px;">
+      <li><strong>The dispute reasons for Trail-Gear's 2 recent chargebacks</strong> — were they fraudulent (Stripe Chargeback Protection would cover them) or service-related (it would not)? Bolt's dashboard should expose this.</li>
+      <li><strong>Whether Trail-Gear is eligible for Stripe Chargeback Protection at launch</strong> given the 6-month-on-Stripe minimum referenced in Stripe's published documentation. Sean (Stripe Small Business Manager) is the right person to clarify this.</li>
+    </ol>
+  </div>
+
+  <!-- Three scenarios -->
+  <div class="card">
+    <h2>Three Scenarios for Evaluating the Savings</h2>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:14px;">
+      The "Total quoted fees" in the side-by-side comparison above include Bolt's chargeback protection (via the risk fee) but no Stripe equivalent. The three scenarios below adjust for this and bring the comparison into apples-to-apples territory.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>What's included</th>
+          <th class="right">90-day cost</th>
+          <th class="right">Effective %</th>
+          <th class="right">Annualized vs. Bolt today</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bolt today</strong></td>
+          <td>Processing + platform + risk fee</td>
+          <td class="right">$58,266</td>
+          <td class="right">2.91%</td>
+          <td class="right">baseline</td>
+        </tr>
+        <tr>
+          <td><strong>Stripe self-insure</strong></td>
+          <td>Stripe at quoted rates; Trail-Gear absorbs ~$1,574/90 days in chargeback losses directly</td>
+          <td class="right">$51,863</td>
+          <td class="right">~2.59%</td>
+          <td class="right" style="color:var(--savings-color);font-weight:600;">~$25,612 saved</td>
+        </tr>
+        <tr>
+          <td><strong>Stripe + Chargeback Protection</strong></td>
+          <td>Stripe at quoted rates + Chargeback Protection at 0.4% (estimated; pricing TBC)</td>
+          <td class="right">$58,308</td>
+          <td class="right">~2.91%</td>
+          <td class="right">~$0</td>
+        </tr>
+        <tr>
+          <td><strong>Strict apples-to-apples</strong></td>
+          <td>Bolt without risk fee vs. Stripe without Chargeback Protection — pure processing comparison</td>
+          <td class="right">$54,521 vs. $50,289</td>
+          <td class="right">2.72% vs. 2.51%</td>
+          <td class="right" style="color:var(--savings-color);font-weight:600;">~$16,928 saved</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 style="margin-top:24px;">How to read this</h3>
+    <ul style="font-size:13px;color:var(--slate);margin-bottom:14px;padding-left:24px;">
+      <li>The <strong>Stripe self-insure</strong> row is mathematically the cheapest option at Trail-Gear's current chargeback rate. The tradeoff is that Trail-Gear takes on the operational burden of handling disputes and absorbs variance month-to-month.</li>
+      <li>The <strong>Stripe + Chargeback Protection</strong> row uses Stripe's published 0.4% rate as a placeholder. At this rate, the savings essentially evaporate — the comparison becomes a wash. <strong>This is the row most sensitive to the actual Chargeback Protection pricing Stripe quotes</strong>; if Stripe offers Trail-Gear something below 0.4%, savings reappear.</li>
+      <li>The <strong>Strict apples-to-apples</strong> row is the most useful number for direct rate comparison: Bolt charges 2.72% for processing (excluding chargeback protection); Stripe charges 2.51% for processing (also excluding chargeback protection). On this basis, Stripe is 0.21 pp cheaper, worth ~$17k/year — and that's the savings before any decision about chargeback protection is layered on.</li>
+    </ul>
+    <p style="font-size:12px;color:var(--gray-500);margin-top:14px;font-style:italic;">
+      The original "$32k/year savings" headline corresponds to comparing Bolt-with-risk-fee against Stripe-without-Chargeback-Protection — a comparison that overstates Stripe's advantage by treating Bolt's protection as a fee while not treating Stripe's missing protection as a cost. The three scenarios above are the more defensible framing.
+    </p>
   </div>
 
   <!-- Methodology -->
