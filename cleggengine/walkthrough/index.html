@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Clegg Engine project walkthrough — Mosaic Commerce.">
+<title>Clegg Engine — Project Walkthrough</title>
+<style>
+  :root{
+    --ink:#1f2530; --muted:#5b6470; --line:#e3e6ea; --bg:#f6f7f9;
+    --card:#ffffff; --red:#b3151b; --red-dark:#8f1116; --accent:#0f5b8f;
+    --ok:#1f7a44; --ok-bg:#eaf5ee; --ask:#9a5b00; --ask-bg:#fdf3e3;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px; margin:0 auto; padding:0 22px}
+
+  /* Header */
+  header.site{background:#fff; border-bottom:1px solid var(--line)}
+  header.site .wrap{display:flex; align-items:center; justify-content:space-between; padding:18px 22px}
+  header.site img{height:38px; width:auto; display:block}
+  header.site .meta{font-size:13px; color:var(--muted); text-align:right}
+
+  /* Hero */
+  .hero{background:linear-gradient(180deg,#fff, #fbfbfc); border-bottom:1px solid var(--line); padding:46px 0 40px}
+  .hero h1{font-size:34px; line-height:1.15; margin:0 0 12px; letter-spacing:-.02em}
+  .hero p.lead{font-size:18px; color:var(--muted); margin:0 0 24px; max-width:62ch}
+  .pill-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px}
+  .pill{display:inline-flex; align-items:center; gap:7px; background:#fff; border:1px solid var(--line);
+        border-radius:999px; padding:7px 13px; font-size:13.5px; font-weight:600; color:var(--ink)}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--ok)}
+
+  /* TOC */
+  nav.toc{display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 0}
+  nav.toc a{font-size:14px; text-decoration:none; color:var(--accent); border:1px solid var(--line);
+            background:#fff; padding:6px 12px; border-radius:8px; font-weight:600}
+  nav.toc a:hover{border-color:var(--accent)}
+
+  /* Sections */
+  section{padding:44px 0; border-bottom:1px solid var(--line)}
+  .kicker{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+          color:var(--red); margin:0 0 8px}
+  h2{font-size:26px; margin:0 0 6px; letter-spacing:-.01em}
+  h3{font-size:18px; margin:30px 0 10px}
+  .sub{color:var(--muted); margin:0 0 18px; font-size:16.5px}
+  p{margin:0 0 14px}
+
+  .status{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
+          background:var(--ok-bg); color:var(--ok); border:1px solid #cfe6d8; padding:5px 11px; border-radius:999px; margin-bottom:14px}
+
+  /* Step flow */
+  .flow{counter-reset:step; margin:18px 0 6px; padding:0; list-style:none}
+  .flow li{position:relative; padding:10px 0 10px 44px; border-left:2px solid var(--line); margin-left:14px}
+  .flow li::before{counter-increment:step; content:counter(step); position:absolute; left:-15px; top:9px;
+      width:28px; height:28px; border-radius:50%; background:var(--ink); color:#fff; font-size:13px; font-weight:700;
+      display:flex; align-items:center; justify-content:center}
+  .flow li b{display:block}
+  .flow li span{color:var(--muted); font-size:15px}
+
+  /* Figure / screenshot slots */
+  figure{margin:22px 0; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#fff}
+  figure img{display:block; width:100%; height:auto}
+  figure figcaption{font-size:13.5px; color:var(--muted); padding:11px 15px; border-top:1px solid var(--line); background:#fcfcfd}
+  figure figcaption b{color:var(--ink)}
+  .ph{aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; text-align:center; padding:26px;
+      background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 12px,#f3f5f7 12px,#f3f5f7 24px); color:#8b95a1}
+  .ph .ph-inner{max-width:46ch}
+  .ph .ph-tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:#9aa3ae; border:1px dashed #c4ccd5; border-radius:6px; padding:4px 9px; margin-bottom:10px}
+  .ph .ph-file{display:block; margin-top:9px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:#aab2bc}
+
+  /* Callout — what I need from you */
+  .need{background:var(--ask-bg); border:1px solid #f0dcb4; border-left:4px solid var(--ask); border-radius:12px;
+        padding:18px 20px; margin:24px 0 6px}
+  .need h4{margin:0 0 10px; font-size:15px; color:var(--ask); letter-spacing:.02em; text-transform:uppercase; font-weight:800}
+  .need ul{margin:0; padding-left:20px}
+  .need li{margin:0 0 9px}
+  .need li:last-child{margin-bottom:0}
+
+  /* Demo links */
+  .demo{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:22px 0}
+  .demo h4{margin:0 0 6px; font-size:15px}
+  .demo .note{font-size:13.5px; color:var(--muted); margin:0 0 13px}
+  .demo a.btn{display:flex; align-items:center; justify-content:space-between; gap:12px; text-decoration:none;
+      color:var(--ink); border:1px solid var(--line); border-radius:9px; padding:11px 14px; margin:8px 0; font-weight:600}
+  .demo a.btn:hover{border-color:var(--accent); background:#f7fbff}
+  .demo a.btn .fam{color:var(--accent)}
+  .demo a.btn .arrow{color:#aab2bc; font-weight:400}
+
+  /* Closing */
+  .close{padding:48px 0 56px}
+  .close .box{background:var(--ink); color:#fff; border-radius:var(--radius); padding:30px 28px}
+  .close h2{color:#fff}
+  .close p{color:#cfd5dd}
+  .close ul{margin:14px 0 0; padding-left:20px}
+  .close li{margin:0 0 8px; color:#e6e9ed}
+  .close .cta{display:inline-block; margin-top:20px; background:var(--red); color:#fff; text-decoration:none;
+      font-weight:700; padding:12px 20px; border-radius:9px}
+  .close .cta:hover{background:var(--red-dark)}
+
+  footer.site{padding:26px 0 40px; color:var(--muted); font-size:13px; text-align:center}
+
+  @media (max-width:560px){
+    .hero h1{font-size:27px} h2{font-size:22px}
+    header.site .meta{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <img src="images/mosaic-logo.png" alt="Mosaic Commerce">
+    <div class="meta">Prepared for Clegg Engine<br>Tieson &amp; Taylor</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="kicker">Project Walkthrough</span>
+    <h1>Two systems, built and running on staging — ready for your review.</h1>
+    <p class="lead">Both of these are essentially done. What they need now is your eyes and a few decisions, so we can take them the last step to production. Here's what each one does and exactly what I need from you.</p>
+    <div class="pill-row">
+      <span class="pill"><span class="dot"></span> QuickBooks ⇄ Magento — live on staging</span>
+      <span class="pill"><span class="dot"></span> Product Add-ons — live on staging</span>
+    </div>
+    <nav class="toc">
+      <a href="#quickbooks">1 · QuickBooks Integration</a>
+      <a href="#addons">2 · Product Add-ons</a>
+      <a href="#next">What's next</a>
+    </nav>
+  </div>
+</div>
+
+<!-- ===================== QUICKBOOKS ===================== -->
+<section id="quickbooks">
+  <div class="wrap">
+    <span class="kicker">System 1</span>
+    <h2>QuickBooks ⇄ Magento Integration</h2>
+    <p class="sub">Orders flow automatically into QuickBooks as invoices; tracking entered in QuickBooks flows back to Magento as a shipment.</p>
+    <span class="status"><span class="dot" style="background:var(--ok)"></span> Built &amp; verified end-to-end on the staging sandbox</span>
+
+    <p>Today this is a manual, double-entry job. This integration closes the loop in both directions, with no copy-paste between systems:</p>
+
+    <ol class="flow">
+      <li><b>An order is placed in Magento</b><span>It exports automatically to QuickBooks as an invoice.</span></li>
+      <li><b>The invoice is fully itemized</b><span>Customer-selected options, kit contents, and any add-ons each appear as their own line — and add-ons are tagged with the kit they belong to.</span></li>
+      <li><b>You enter the tracking number in QuickBooks</b><span>Just as part of your normal fulfillment workflow.</span></li>
+      <li><b>Magento creates the shipment automatically</b><span>The tracking number syncs back, the shipment + customer notification are generated, and the order is marked complete.</span></li>
+      <li><b>Partial / split shipments are handled too</b><span>When only part of an order ships, you can enter tracking for just those items and Magento ships exactly those — the rest stays open until it ships.</span></li>
+    </ol>
+
+    <h3>What it looks like</h3>
+
+    <figure>
+      <img src="images/qb-invoice.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/qb-invoice.png"
+           data-desc="The QuickBooks invoice for a test order — product lines, selected options, kit contents, and add-on lines each itemized, with add-ons tagged &ldquo;Part of Kit.&rdquo;">
+      <figcaption><b>QuickBooks invoice</b> — an order itemized in QuickBooks: options, kit contents, and add-on lines, each tagged with its kit.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/qb-magento-order.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/qb-magento-order.png"
+           data-desc="The matching Magento order showing the QuickBooks invoice ID stored against it.">
+      <figcaption><b>The matching Magento order</b> — linked to its QuickBooks invoice, the two systems kept in sync.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/qb-shipment.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/qb-shipment.png"
+           data-desc="The Magento shipment created automatically from a tracking number entered in QuickBooks — carrier auto-detected, order marked complete.">
+      <figcaption><b>Tracking → shipment</b> — entering a tracking number in QuickBooks created this Magento shipment automatically and completed the order.</figcaption>
+    </figure>
+
+    <div class="need">
+      <h4>What I need from you</h4>
+      <ul>
+        <li><b>Tieson — 10 minutes to confirm the shipping workflow.</b> Let me show you how partial shipments are entered in QuickBooks so you can tell me it matches how you actually ship. This is the one open question from April — now built rather than just proposed.</li>
+        <li><b>Scoped production QuickBooks access.</b> To verify this against the live company, I need to see invoices and sales — <b>not</b> your full income or financials. Limited, invoice/sales-scoped access is enough; I can also walk you through generating the API keys yourself if you'd prefer I never log into QuickBooks directly. I just need enough visibility to confirm orders are flowing and to fix things quickly if they aren't.</li>
+        <li><b>One small setup item on the live QuickBooks:</b> add a custom field named exactly <b>“Tracking Number”</b> on invoices. I'll guide whoever has admin access through it — about two minutes.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ADD-ONS ===================== -->
+<section id="addons">
+  <div class="wrap">
+    <span class="kicker">System 2</span>
+    <h2>Product Add-ons</h2>
+    <p class="sub">Add-ons appear as checkboxes on the kit's product page and become their own line items through the entire order lifecycle.</p>
+    <span class="status"><span class="dot" style="background:var(--ok)"></span> Built &amp; smoke-tested on staging across all three kit families</span>
+
+    <p>Add-ons (intake/exhaust valve sets, cam kits, harmonic balancers, and so on) used to be buried as options on the parent product. Now each add-on a customer selects becomes its <b>own separate line item</b> — in the cart, on the order, in the shipment email, and on the QuickBooks invoice — while keeping the same one-click experience for the customer.</p>
+
+    <ol class="flow">
+      <li><b>Add-ons show as checkboxes on the product page</b><span>Right alongside the kit, with name, price, and any variant note.</span></li>
+      <li><b>One click adds the kit and its add-ons together</b><span>Each ticked add-on is added as its own cart line, nested under the kit it belongs to.</span></li>
+      <li><b>Quantities stay glued to the kit</b><span>Order two kits and the add-ons follow; remove the kit and its add-ons come off with it.</span></li>
+      <li><b>It carries through to the order, email, and QuickBooks</b><span>Every add-on is a clean separate line, tagged with its parent kit — all the way into the QuickBooks invoice.</span></li>
+    </ol>
+
+    <h3>What it looks like</h3>
+
+    <figure>
+      <img src="images/addons-pdp.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/addons-pdp.png"
+           data-desc="The Add-Ons section on a kit's product page — checkboxes for each available add-on with name, price, and note, below the main options.">
+      <figcaption><b>Product page</b> — the Add-Ons section, with a checkbox for each available add-on.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/addons-cart.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/addons-cart.png"
+           data-desc="The cart showing add-ons nested and indented under their parent kit, each with a red &ldquo;Add-on&rdquo; badge and a &lsquo;part of {Kit}&rsquo; label.">
+      <figcaption><b>Cart</b> — add-ons nested under their kit, each as its own priced line with an “Add-on” badge.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/addons-email.png" alt="" onerror="phFail(this)"
+           data-tag="Screenshot" data-file="images/addons-email.png"
+           data-desc="The order confirmation email showing each add-on as a separate line tagged &ldquo;Part of Kit,&rdquo; with the kit's contents listed beneath the kit line.">
+      <figcaption><b>Order confirmation email</b> — add-ons as separate lines, each tagged with its kit, with kit contents listed under the kit.</figcaption>
+    </figure>
+
+    <div class="demo">
+      <h4>See it live on staging</h4>
+      <p class="note">These open the real working pages on the staging site. You'll be asked to sign in — use your <b>@cleggengine.com</b> email address and enter the one-time code it sends you.</p>
+      <a class="btn" href="https://staging.cleggengine.com/amc-ohv-4-151-2-5l-master-engine-rebuild-kit-1980-1983.html" target="_blank" rel="noopener">
+        <span><span class="fam">Engine Rebuild Kit</span> — AMC OHV-4 151 Master Rebuild Kit</span><span class="arrow">Open ↗</span></a>
+      <a class="btn" href="https://staging.cleggengine.com/hemi-5-7l-03-08-camshaft.html" target="_blank" rel="noopener">
+        <span><span class="fam">Hemi Stroker</span> — Hemi 5.7L '03–'08 Camshaft</span><span class="arrow">Open ↗</span></a>
+      <a class="btn" href="https://staging.cleggengine.com/jeep-4-0l-stage-3-performance-camshaft-kit-by-cleggs-ce-j4-cam3.html" target="_blank" rel="noopener">
+        <span><span class="fam">Jeep Stroker</span> — Jeep 4.0L Stage 3 Performance Camshaft Kit</span><span class="arrow">Open ↗</span></a>
+    </div>
+
+    <div class="need">
+      <h4>What I need from you</h4>
+      <ul>
+        <li><b>A quick look and your sign-off.</b> Click into the demo pages above (or we can walk them together on our call) and confirm the behavior and presentation are right.</li>
+        <li><b>That's the last decision.</b> Once you're happy, the only remaining step is running the same migration on production — no further build work.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== NEXT ===================== -->
+<section class="close" id="next">
+  <div class="wrap">
+    <div class="box">
+      <span class="kicker" style="color:#ff9a9e">What's next</span>
+      <h2>Let's set a weekly check-in.</h2>
+      <p>Both systems are at the same point: built, on staging, and waiting on a few decisions rather than more build time. A standing 30-minute weekly call is the fastest way to keep the “last 10%” of each project from sitting for weeks — I can demo live and we decide in the room.</p>
+      <p style="color:#fff; font-weight:600; margin-bottom:4px">To unblock the two systems above, I need:</p>
+      <ul>
+        <li>Tieson — 10 minutes on the QuickBooks partial-shipment workflow</li>
+        <li>Scoped, invoice/sales-only access to the production QuickBooks</li>
+        <li>A “Tracking Number” custom field added on the live QuickBooks invoices</li>
+        <li>Your sign-off on the add-ons after a quick look</li>
+      </ul>
+      <a class="cta" href="mailto:?subject=Clegg%20Engine%20weekly%20check-in">Send me a couple of times this week →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">Mosaic Commerce · Prepared for Clegg Engine</div>
+</footer>
+
+<script>
+  // Render a labeled placeholder when a screenshot file isn't present yet.
+  function phFail(img){
+    var f = document.createElement('div');
+    f.className = 'ph';
+    f.innerHTML = '<div class="ph-inner">'
+      + '<span class="ph-tag">' + (img.dataset.tag || 'Screenshot') + ' to add</span>'
+      + '<div>' + (img.dataset.desc || '') + '</div>'
+      + '<span class="ph-file">drop file: ' + (img.dataset.file || '') + '</span>'
+      + '</div>';
+    img.replaceWith(f);
+  }
+</script>
+
+</body>
+</html>
